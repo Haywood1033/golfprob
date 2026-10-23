@@ -339,7 +339,7 @@ details.more[open] summary::before { transform: rotate(90deg); }
   <div class="wrap" role="tablist">
     <button class="tab" role="tab" data-tab="odds" aria-selected="true">Finishing odds</button>
     <button class="tab" role="tab" data-tab="matchups" aria-selected="false">Matchups</button>
-    <button class="tab" role="tab" data-tab="dfs" aria-selected="false">DraftKings</button>
+    <button class="tab" role="tab" data-tab="dfs" aria-selected="false">DFS Optimizer</button>
     <button class="tab" role="tab" data-tab="weather" aria-selected="false">Weather</button>
     <button class="tab" role="tab" data-tab="backtest" aria-selected="false">Model &amp; backtest</button>
   </div>
@@ -1235,7 +1235,7 @@ function wireDrop() {
 
 
 // ── DraftKings Classic ───────────────────────────────────────────────────────────────────
-const DK_MODES = { projection: { label: 'Projection', w: 0, tip: 'Mean DK points — cash games' }, balanced: { label: 'Balanced', w: 0.5, tip: 'Halfway between mean and 90th-percentile outcome' }, ceiling: { label: 'Ceiling', w: 1, tip: '90th-percentile outcome — large-field tournaments' } };
+const DK_MODES = { projection: { label: 'Projection', w: 0, tip: 'Mean fantasy points — cash games' }, balanced: { label: 'Balanced', w: 0.5, tip: 'Halfway between mean and 90th-percentile outcome' }, ceiling: { label: 'Ceiling', w: 1, tip: '90th-percentile outcome — large-field tournaments' } };
 const dkKey = () => `golfprob-dk-${S.tour}-${S.data?.event.id}`;
 
 function loadSalaryFile(file) {
@@ -1244,7 +1244,7 @@ function loadSalaryFile(file) {
     const rows = parseCsv(String(reader.result));
     const head = rows[0].map(h => h.trim().toLowerCase());
     const iName = head.indexOf('name'), iId = head.indexOf('id'), iSal = head.indexOf('salary'), iNameId = head.indexOf('name + id');
-    if (iName < 0 || iSal < 0) { alert('This doesn’t look like a DraftKings salary file. It needs “Name” and “Salary” columns (DKSalaries.csv from the contest’s Export to CSV).'); return; }
+    if (iName < 0 || iSal < 0) { alert('This doesn’t look like a salary file. It needs “Name” and “Salary” columns (the contest’s Export to CSV).'); return; }
     S.salaries = { fileName: file.name, raw: rows.slice(1).map(r => ({ name: r[iName], id: iId >= 0 ? r[iId] : '', nameId: iNameId >= 0 ? r[iNameId] : '', salary: Number(String(r[iSal]).replace(/[$,]/g, '')) })).filter(r => r.name && r.salary > 0) };
     resolveSalaries();
     try { localStorage.setItem(dkKey(), JSON.stringify({ fileName: S.salaries.fileName, raw: S.salaries.raw })); } catch { /* storage unavailable */ }
@@ -1276,7 +1276,7 @@ function dkPool() {
 function renderDfs() {
   const el = $('#panel-dfs');
   const d = S.data;
-  if (!d) { el.innerHTML = S.errors.tournament ? stateHtml('err', 'DraftKings unavailable', 'The tournament model didn’t load.', S.errors.tournament) : '<div class="skel" style="height:420px"></div>'; return; }
+  if (!d) { el.innerHTML = S.errors.tournament ? stateHtml('err', 'DFS Optimizer unavailable', 'The tournament model didn’t load.', S.errors.tournament) : '<div class="skel" style="height:420px"></div>'; return; }
   const pool = dkPool();
   const hasSal = !!S.salaries;
   const unmatched = hasSal ? S.salaries.rows.filter(r => !r.player) : [];
@@ -1290,10 +1290,10 @@ function renderDfs() {
   el.innerHTML = `
     <div class="drop" id="dkDrop" style="margin-bottom:16px">
       <div style="flex:1;min-width:240px">
-        <div style="font-weight:600;color:var(--ink)">${hasSal ? `Salaries loaded: ${esc(S.salaries.fileName)}` : 'Upload your DraftKings salaries'}</div>
-        <div class="note" style="margin-top:2px">${hasSal ? `${S.salaries.rows.length} golfers · ${S.salaries.rows.length - unmatched.length} matched to the field${unmatched.length ? ` · <b>${unmatched.length} unmatched</b>: ${esc(unmatched.slice(0, 4).map(u => u.name).join(', '))}${unmatched.length > 4 ? '…' : ''}` : ''}. Saved in this browser for this event.` : 'In the DK contest lobby, open the contest and choose <b>Export to CSV</b> (DKSalaries.csv), then drop it here. Projections below already use DK Classic scoring.'}</div>
+        <div style="font-weight:600;color:var(--ink)">${hasSal ? `Salaries loaded: ${esc(S.salaries.fileName)}` : 'Upload your salary file'}</div>
+        <div class="note" style="margin-top:2px">${hasSal ? `${S.salaries.rows.length} golfers · ${S.salaries.rows.length - unmatched.length} matched to the field${unmatched.length ? ` · <b>${unmatched.length} unmatched</b>: ${esc(unmatched.slice(0, 4).map(u => u.name).join(', '))}${unmatched.length > 4 ? '…' : ''}` : ''}. Saved in this browser for this event.` : 'In the contest lobby, open the contest and choose <b>Export to CSV</b>, then drop the file here. Projections below already use Classic golf scoring.'}</div>
       </div>
-      <label class="btn primary">${ICON.upload} ${hasSal ? 'Replace file' : 'Upload DKSalaries.csv'}<input type="file" id="dkFile" accept=".csv,text/csv" hidden></label>
+      <label class="btn primary">${ICON.upload} ${hasSal ? 'Replace file' : 'Upload salary CSV'}<input type="file" id="dkFile" accept=".csv,text/csv" hidden></label>
       ${hasSal ? '<button class="btn ghost" id="dkClear">Clear</button>' : ''}
     </div>
 
@@ -1325,7 +1325,7 @@ function renderDfs() {
           <th class="l" data-tip="Lock into every lineup / exclude from all">Lock · Out</th>
           ${th('name', 'Golfer', '', true)}
           ${hasSal ? th('salary', 'Salary') : ''}
-          ${th('proj', 'Proj', 'Mean DraftKings points across the simulations')}
+          ${th('proj', 'Proj', 'Mean fantasy points across the simulations')}
           ${th('floor', 'Floor', '10th percentile outcome')}
           ${th('ceil', 'Ceiling', '90th percentile outcome')}
           ${hasSal ? th('value', 'Pts / $1K', `${DK_MODES[S.dkMode].label} points per $1,000 of salary`) : ''}
@@ -1347,7 +1347,7 @@ function renderDfs() {
         </tr>`).join('') || `<tr><td colspan="10" class="muted" style="height:80px;text-align:center">${hasSal ? 'No golfers match.' : 'No projections.'}</td></tr>`}</tbody>
       </table>
     </div>
-    <p class="note foot">DK points come from the same simulations as the finishing odds: each simulated round score is converted to expected DK hole points (eagles, birdies, bogeys, the birdie-streak and bogey-free bonuses) using the course’s actual hole pars, plus finish-position points and the all-rounds-under-70 bonus. Missed cuts score two rounds only. Golf has little lineup correlation beyond weather, so the draw filter is the main stacking tool.</p>`;
+    <p class="note foot">Fantasy points come from the same simulations as the finishing odds: each simulated round score is converted to expected hole points (eagles, birdies, bogeys, the birdie-streak and bogey-free bonuses) using the course’s actual hole pars, plus finish-position points and the all-rounds-under-70 bonus. Missed cuts score two rounds only. Golf has little lineup correlation beyond weather, so the draw filter is the main stacking tool.</p>`;
   wireDfs();
 }
 
@@ -1360,7 +1360,7 @@ function dfsResultsHtml(r, pool) {
     ${r.reason ? `<div class="card state" style="padding:16px;margin-bottom:16px;text-align:left"><p style="margin:0;max-width:none"><b style="color:var(--warn)">${esc(r.reason)}</b></p></div>` : ''}
     <div class="wx-two" style="grid-template-columns:minmax(0,1fr) 300px;margin-bottom:16px">
       <div>
-        <div class="toolbar"><strong>${r.lineups.length} lineup${r.lineups.length === 1 ? '' : 's'}</strong><span class="note">${DK_MODES[r.mode].label} mode · ${(r.ms / 1000).toFixed(1)}s</span><span class="spacer"></span><button class="btn" id="dkExport">Download for DK upload</button></div>
+        <div class="toolbar"><strong>${r.lineups.length} lineup${r.lineups.length === 1 ? '' : 's'}</strong><span class="note">${DK_MODES[r.mode].label} mode · ${(r.ms / 1000).toFixed(1)}s</span><span class="spacer"></span><button class="btn" id="dkExport">Download upload CSV</button></div>
         <div class="lineups">${r.lineups.map((l, i) => `<div class="card">
           <div class="group-h"><strong>Lineup ${i + 1}</strong><span class="tag" style="margin-left:auto">${l.players.reduce((s, p) => s + byId.get(p.id).proj, 0).toFixed(1)} pts</span></div>
           <div class="lu-row head"><span>Golfer</span><span>Salary</span><span>Proj</span></div>
@@ -1404,7 +1404,7 @@ function exportDfs() {
   const r = S.dkResult, pool = new Map(dkPool().map(p => [p.id, p]));
   const lines = ['G,G,G,G,G,G', ...r.lineups.map(l => l.players.map(p => pool.get(p.id)?.dkId || pool.get(p.id)?.name).join(','))];
   const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/csv' });
-  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `golfprob-dk-lineups-${S.data.event.id}.csv` });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `golfprob-lineups-${S.data.event.id}.csv` });
   a.click(); URL.revokeObjectURL(a.href);
 }
 
