@@ -39,7 +39,8 @@ async function auditEvent(tour, eventId) {
   }
   const rows = roundsFromEvent(ev);
   return {
-    event: { id: ev.id, name: ev.name, state: ev.state, rounds: ev.numberOfRounds, par: ev.course.par, cut: ev.cut, statusDetail: ev.statusDetail },
+    excluded: require('../lib/store').excludedReason(ev),
+    event: { id: ev.id, name: ev.name, state: ev.state, scoringSystem: ev.scoringSystem, rounds: ev.numberOfRounds, par: ev.course.par, cut: ev.cut, statusDetail: ev.statusDetail },
     players: ev.players.length, statusCounts, perRound, storedRows: rows.length,
     mismatchCount: ev.players.filter(p => {
       const e = p.status === 'CUT' ? 2 : p.status === 'ACTIVE' ? ev.numberOfRounds : null;

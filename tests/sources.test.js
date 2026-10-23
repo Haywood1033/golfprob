@@ -207,8 +207,9 @@ test('R1 start hole inferred from R2 so same-time groups on 1 and 10 stay apart'
   } finally { global.fetch = real; }
 });
 
-test('team events never become rating history', () => {
-  const { isTeamEvent } = require('../lib/store');
+test('team and points events never become rating history', () => {
+  const { excludedReason } = require('../lib/store');
+  const isTeamEvent = ev => excludedReason(ev) === 'team event';
   const fx = leaderboardFixture();
   fx.events[0].name = 'Zurich Classic of New Orleans';
   const ev = parseLeaderboard(fx, 'pga');
@@ -218,4 +219,19 @@ test('team events never become rating history', () => {
   const fx2 = leaderboardFixture();
   fx2.events[0].competitions[0].competitors.forEach(c => { delete c.athlete; c.team = { displayName: 'A/B' }; });
   assert.ok(isTeamEvent(parseLeaderboard(fx2, 'pga')));
+  // Stableford: flagged by ESPN's scoringSystem, or by name when that's missing.
+  const fx3 = leaderboardFixture();
+  fx3.events[0].tournament.scoringSystem = { name: 'Modified Stableford' };
+  const st = parseLeaderboard(fx3, 'pga');
+  assert.match(excludedReason(st), /Stableford/);
+  assert.strictEqual(roundsFromEvent(st).length, 0);
+  const fx4 = leaderboardFixture();
+  fx4.events[0].name = 'Barracuda Championship';
+  assert.ok(excludedReason(parseLeaderboard(fx4, 'pga')));
+  // Plain stroke play stays in.
+  const fx5 = leaderboardFixture();
+  fx5.events[0].tournament.scoringSystem = { name: 'Stroke Play' };
+  assert.strictEqual(excludedReason(parseLeaderboard(fx5, 'pga')), null);
+  fx5.events[0].tournament.scoringSystem = { name: 'Medal' };
+  assert.strictEqual(excludedReason(parseLeaderboard(fx5, 'pga')), null, 'unfamiliar labels never exclude');
 });
