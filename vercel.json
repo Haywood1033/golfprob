@@ -1,0 +1,19 @@
+{
+  "outputDirectory": ".",
+  "functions": {
+    "api/tournament.js": { "maxDuration": 60 },
+    "api/weather.js":    { "maxDuration": 30 },
+    "api/events.js":     { "maxDuration": 30 },
+    "api/sync.js":       { "maxDuration": 60 },
+    "api/backtest.js":   { "maxDuration": 60 },
+    "api/status.js":     { "maxDuration": 30 },
+    "api/health.js":     { "maxDuration": 30 }
+  },
+  "crons": [
+    { "path": "/api/sync?cron=1", "schedule": "0 11 * * 1" }
+  ],
+  "rewrites": [
+    { "source": "/", "destination": "/app.html" },
+    { "source": "/app", "destination": "/app.html" }
+  ]
+}
