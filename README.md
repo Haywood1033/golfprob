@@ -12,6 +12,7 @@ top-N, make-cut, 2-balls and 3-balls can never contradict each other.
 | Tab | What it shows |
 |---|---|
 | **Finishing odds** | Win / top 5 / top 10 / top 20 / make cut, fair odds, avg finish, draw (AM/PM) with weather cost, signals, confidence. Once the event starts, a **Pos** column shows leaderboard position, total to par and holes completed (sortable). Click a player for the finish distribution, recent rounds, tee times and reasoning. Upload book odds for an Edge column. |
+| **Best plays** | Top bet targets in three sections, each with per-play reasons and a summary of what separates them from the rest of the slate: **matchup targets** (one per group), **finishing position** (Win / Top 5 / 10 / 20 / Make cut) and the best **3-, 4- and 5-leg finishing-position parlays** (Top 10 / Top 20 / Make cut, priced inside the simulation). With uploaded book prices a section ranks by expected profit and only keeps plays at 3%+ EV with a realistic chance to hit; without prices it ranks by model strength and says so. |
 | **Matchups** | Every 3-ball / 2-ball from the real tee sheet (R2 projected from R1 until posted), dead-heat-adjusted. Upload a CSV of book prices → de-vigged edges and a "best prices" list ranked by EV. **Parlay builder:** tap players to add legs; legs are priced together inside the simulation (shared wave, same player both rounds), with fair odds and EV vs your book. **Auto-build** finds the best 2/3/4-leg parlays (by EV with book prices, else most likely). |
 | **DFS Optimizer** | DK Classic projections (mean, floor, ceiling) from the same sims. Upload DKSalaries.csv → exact optimizer (6 golfers, $50k): Projection / Balanced / Ceiling, 1–150 lineups, exposure cap, min unique players, draw (wave) stacking, locks/excludes, exposure table, and a CSV in DK's upload format. |
 | **Weather** | Draw verdict with ensemble agreement, day cards, hourly wind/gust chart with ensemble band and wave ribbons, direction strip, wind-by-wave compass, rain and temperature, a wave comparison table, and a full generated briefing. |
@@ -49,7 +50,7 @@ top-N, make-cut, 2-balls and 3-balls can never contradict each other.
 
 ## Status — what's verified and what isn't
 
-- ✅ **32 tests pass** (`npm test`) on synthetic data with known ground truth: fixed effects recover
+- ✅ **35 tests pass** (`npm test`) on synthetic data with known ground truth: fixed effects recover
   true skill across strong/weak fields, no leakage, probabilities sum correctly (one winner, top-10
   dead-heat shares sum to 10), 3-ball prices match brute force, wave costs move the right players,
   and an end-to-end run of every route with mocked ESPN/Open-Meteo.
@@ -83,6 +84,7 @@ Without a database everything still works — the model just runs on a shorter l
 | `/api/backtest?tour=pga&events=8` | Leak-free backtest |
 | `/api/sync?tour=pga&season=2025` | Backfill completed events into Postgres |
 | `POST /api/parlay` | Price a parlay `{legs:[{round,id,dec}]}` or auto-build `{auto:{round,size}}` |
+| `POST /api/plays` | Best plays `{book:[{market,round,id,dec}]}` |
 | `/api/grades` | Grade finished snapshots, return the live track record |
 | `/api/status` | History data status |
 | `/api/health` | Upstream checks + ESPN shape report |

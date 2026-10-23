@@ -237,6 +237,29 @@ table.data { width: 100%; border-collapse: separate; border-spacing: 0; font-siz
 .lk button.on-ex { background: var(--neg-wash); border-color: rgba(248, 113, 113, 0.5); color: var(--neg); }
 .progress { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; margin-top: 10px; }
 .progress > i { display: block; height: 100%; background: var(--accent); transition: width 0.2s; }
+.callout { border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 var(--r-sm) var(--r-sm) 0; padding: 12px 16px; color: var(--ink-2); font-size: 13.5px; line-height: 1.6; margin-bottom: 14px; max-width: 110ch; }
+.section-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 28px 0 12px; }
+.section-head:first-child { margin-top: 0; }
+.section-head h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+.plays { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+@media (max-width: 720px) { .plays { grid-template-columns: 1fr; } }
+.play { display: grid; grid-template-rows: auto 1fr; }
+.play-h { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: start; padding: 14px 16px 10px; }
+.play-rank { width: 24px; height: 24px; border-radius: 6px; background: var(--surface-3); color: var(--ink-2); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.play-name { font-weight: 700; font-size: 15px; }
+.play-sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.play-prob { text-align: right; }
+.play-prob .big { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.play-prob .small { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.play ul { margin: 0; padding: 0 16px 14px 54px; color: var(--ink-2); font-size: 12.5px; line-height: 1.55; }
+.play li { margin-bottom: 3px; }
+.play .bookline { margin: 0 16px 10px 54px; font-size: 12px; }
+.tickets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .tickets { grid-template-columns: 1fr; } }
+.leg { display: flex; justify-content: space-between; gap: 10px; padding: 8px 16px; border-top: 1px solid var(--line); font-size: 13px; }
+.leg span:last-child { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.alts { padding: 10px 16px 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+.mode-banner { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 16px; margin-bottom: 20px; }
 .edge-pos { color: var(--pos); font-weight: 600; }
 .edge-neg { color: var(--ink-3); }
 .drop { border: 1px dashed var(--line-2); border-radius: var(--r); padding: 18px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; color: var(--ink-2); font-size: 13px; }
@@ -342,6 +365,7 @@ details.more[open] summary::before { transform: rotate(90deg); }
 <nav class="tabs" aria-label="Sections">
   <div class="wrap" role="tablist">
     <button class="tab" role="tab" data-tab="odds" aria-selected="true">Finishing odds</button>
+    <button class="tab" role="tab" data-tab="plays" aria-selected="false">Best plays</button>
     <button class="tab" role="tab" data-tab="matchups" aria-selected="false">Matchups</button>
     <button class="tab" role="tab" data-tab="dfs" aria-selected="false">DFS Optimizer</button>
     <button class="tab" role="tab" data-tab="weather" aria-selected="false">Weather</button>
@@ -351,6 +375,7 @@ details.more[open] summary::before { transform: rotate(90deg); }
 
 <main class="wrap">
   <section class="panel" id="panel-odds" role="tabpanel"></section>
+  <section class="panel" id="panel-plays" role="tabpanel" hidden></section>
   <section class="panel" id="panel-matchups" role="tabpanel" hidden></section>
   <section class="panel" id="panel-dfs" role="tabpanel" hidden></section>
   <section class="panel" id="panel-weather" role="tabpanel" hidden></section>
@@ -381,6 +406,7 @@ const S = {
   salaries: null, dkMode: 'balanced', dkCount: 20, dkExposure: 0.5, dkUnique: 2, dkDraw: 'all', dkLocks: new Set(), dkExcludes: new Set(),
   dkSort: { key: 'proj', dir: -1 }, dkQ: '', dkResult: null, dkBusy: false, dkProgress: null,
   grades: null, gradesErr: null, gradesLoading: false,
+  plays: null, playsErr: null, playsLoading: false, playsKey: null, pRound: null, pMarket: 'top20', pParlay: 'top20',
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────────────────
@@ -1108,6 +1134,103 @@ function renderMatchups() {
   wireDrop();
 }
 
+
+// ── Best plays ───────────────────────────────────────────────────────────────────────────
+// The uploaded book (resolved to player ids) goes to the server, which ranks against it.
+function playsBook() {
+  if (!S.book?.rows) return [];
+  return S.book.rows.filter(r => r.player && r.dec > 1).map(r => ({ market: r.market, round: r.round, id: r.player.id, dec: r.dec, raw: r.raw }));
+}
+async function loadPlays(force = false) {
+  if (!S.data) return;
+  const book = playsBook();
+  const key = `${S.data.event.id}|${S.data.generatedAt}|${JSON.stringify(book)}`;
+  if (!force && (S.playsKey === key || S.playsLoading)) return;
+  S.playsKey = key; S.playsLoading = true; S.playsErr = null; renderPlays();
+  try { S.plays = await apiPost('/api/plays', { book }); } catch (err) { S.playsErr = err.message; }
+  S.playsLoading = false; renderPlays();
+}
+const modeTag = m => (m === 'value' ? '<span class="tag pos">Value · vs your prices</span>' : '<span class="tag">Model ranking</span>');
+const evText = ev => `${ev >= 0 ? '+' : '−'}$${Math.abs(ev).toFixed(2)}`;
+
+function playCard(p, i, sub) {
+  return `<div class="card play">
+    <div>
+      <div class="play-h">
+        <span class="play-rank">${i + 1}</span>
+        <div><div class="play-name">${esc(p.name)}</div><div class="play-sub">${sub}</div></div>
+        <div class="play-prob"><div class="big">${pct(p.prob)}</div><div class="small">fair ${esc(p.fairOdds)}</div></div>
+      </div>
+      ${p.book ? `<div class="bookline"><span class="tag pos">Book ${esc(p.book.raw || '')} · edge ${p.book.edge >= 0 ? '+' : '−'}${Math.abs(p.book.edge * 100).toFixed(1)} pts · EV ${evText(p.book.ev)} per $1</span></div>` : ''}
+    </div>
+    <ul>${p.reasons.filter(r => !r.startsWith('Book ')).map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+  </div>`;
+}
+
+function renderPlays() {
+  const el = $('#panel-plays');
+  if (!el) return;
+  if (!S.data) { el.innerHTML = S.errors.tournament ? stateHtml('err', 'Best plays unavailable', 'The tournament model didn’t load.', S.errors.tournament) : '<div class="skel" style="height:420px"></div>'; return; }
+  if (S.playsErr) { el.innerHTML = stateHtml('err', 'Couldn’t build the best plays', 'The plays endpoint returned an error.', S.playsErr); return; }
+  const P = S.plays;
+  if (!P) { el.innerHTML = '<div class="card state"><h3>Building best plays…</h3><p>Ranking every matchup, finishing market and parlay combination inside the simulation. This takes a few seconds.</p></div>'; return; }
+  if (S.data.event.state === 'post') { el.innerHTML = stateHtml('', 'This event is final', 'Best plays are for upcoming and live events. Pick the next event from the menu above.'); return; }
+  const hasBook = !!(S.book?.rows?.length);
+  const rounds = P.matchups;
+  if (S.pRound === null || !rounds.some(r => r.round === S.pRound)) S.pRound = rounds[0]?.round ?? null;
+  const mu = rounds.find(r => r.round === S.pRound);
+  const fin = P.finishing[S.pMarket] || P.finishing.top20 || Object.values(P.finishing)[0];
+  const par = P.parlays[S.pParlay] || Object.values(P.parlays)[0];
+  const parKeys = Object.keys(P.parlays);
+
+  el.innerHTML = `
+    <div class="card mode-banner">
+      ${hasBook ? `<span class="tag pos">Book prices loaded</span><span class="note">Sections with prices for that market rank by expected profit; a play only qualifies at ${pct(P.minEv, 0)}+ EV per $1. Sections without prices fall back to model ranking.</span>`
+        : `<span class="tag">No book prices</span><span class="note">Plays rank by model strength: the most likely winners, not proven value. Upload your book’s odds on the <a href="#" data-goto="matchups">Matchups</a> tab to rank by value.</span>`}
+      <span class="spacer" style="flex:1"></span>
+      <span class="note">${S.playsLoading ? 'Updating…' : `Built ${new Date(P.generatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}</span>
+    </div>
+
+    <div class="section-head"><h2>Matchup targets</h2>
+      ${rounds.length > 1 ? `<div class="seg" id="pRound">${rounds.map(r => `<button aria-pressed="${r.round === S.pRound}" data-v="${r.round}">R${r.round}${r.inferred ? ' · projected' : ''}</button>`).join('')}</div>` : ''}
+      ${mu ? modeTag(mu.mode) : ''}</div>
+    ${!mu ? '<p class="callout">Tee times aren’t posted yet, so there are no 2-ball or 3-ball groups to rank. They appear here once ESPN posts the sheet.</p>' : `
+      <p class="callout">${esc(mu.summary)}</p>
+      <div class="plays">${mu.plays.map((p, i) => playCard(p, i, `R${p.round} ${p.group.size}-ball · ${esc(p.group.local)} · Tee ${p.group.startHole} · vs ${p.group.opponents.map(esc).join(', ')}`)).join('')}</div>`}
+
+    <div class="section-head"><h2>Finishing position</h2>
+      <div class="seg" id="pMarket">${Object.entries(P.finishing).map(([k, m]) => `<button aria-pressed="${k === S.pMarket}" data-v="${k}">${esc(m.label)}</button>`).join('')}</div>
+      ${fin ? modeTag(fin.mode) : ''}</div>
+    ${fin ? `<p class="callout">${esc(fin.summary)}</p>
+      <div class="plays">${fin.plays.map((p, i) => playCard(p, i, `${esc(fin.label)}${p.draw ? ` · ${esc(p.draw)} draw` : ''}`)).join('')}</div>` : ''}
+
+    <div class="section-head"><h2>Finishing-position parlays</h2>
+      <div class="seg" id="pParlay">${parKeys.map(k => `<button aria-pressed="${k === S.pParlay}" data-v="${k}">${esc(P.parlays[k].label)}</button>`).join('')}</div>
+      ${par ? modeTag(par.mode) : ''}</div>
+    ${par ? `<p class="callout">${esc(par.summary)}</p>
+      <div class="tickets">${[3, 4, 5].map(n => {
+        const b = par.bySize[n];
+        const t = b?.parlays[0];
+        if (!t) return `<div class="card"><div class="card-b note">${esc(b?.note || `No ${n}-leg ticket available.`)}</div></div>`;
+        return `<div class="card">
+          <div class="play-h" style="grid-template-columns:1fr auto">
+            <div><div class="play-name">${t.legs.length}-leg ${esc(par.label)}</div><div class="play-sub">Correlation ${t.lift.toFixed(2)}× · if independent ${pct(t.independent)}</div></div>
+            <div class="play-prob"><div class="big">${pct(t.joint)}</div><div class="small">fair ${decToAmerican(t.fairDecimal)}</div></div>
+          </div>
+          ${b.fallback ? `<div class="note" style="margin:0 16px 10px">No +EV ${n}-leg ticket qualifies at your prices. This is the most likely ticket instead, priced against your book.</div>` : ''}
+          ${t.ev !== null ? `<div class="bookline" style="margin-left:16px"><span class="tag ${t.ev > 0 ? 'pos' : ''}">Book ${decToAmerican(t.bookDecimal)} · EV ${evText(t.ev)} per $1</span></div>` : ''}
+          ${t.legs.map(l => `<div class="leg"><span>${esc(l.name)}${l.draw ? ` <span class="muted">· ${esc(l.draw)}</span>` : ''}</span><span>${pct(l.prob)}</span></div>`).join('')}
+          ${b.parlays.length > 1 ? `<div class="alts"><b style="color:var(--ink-2)">Alternatives</b><br>${b.parlays.slice(1).map(x => {
+            // Describe each alternative by what it swaps relative to the best ticket.
+            const bestIds = new Set(t.legs.map(l => l.id)), altIds = new Set(x.legs.map(l => l.id));
+            const ins = x.legs.filter(l => !bestIds.has(l.id)).map(l => esc(l.name)), outs = t.legs.filter(l => !altIds.has(l.id)).map(l => esc(l.name));
+            return `${ins.join(', ')} for ${outs.join(', ')}: ${pct(x.joint)}${x.ev !== null ? `, EV ${evText(x.ev)}` : ''}`;
+          }).join('<br>')}</div>` : ''}
+        </div>`;
+      }).join('')}</div>` : ''}
+    <p class="note foot">Every probability here comes from the same simulations as the other tabs. Top-N legs are dead-heat adjusted the way books settle ties. Parlays are counted inside the simulation, not multiplied. ${hasBook ? '' : 'Model rankings show where the model is most confident. Whether a play is worth betting depends on the price.'}</p>`;
+}
+
 // ── Parlay builder ───────────────────────────────────────────────────────────────────────
 function legInfo(l) {
   const m = S.data?.matchups.find(x => x.round === l.round);
@@ -1630,6 +1753,7 @@ function renderAll() {
   renderHero();
   renderOdds();
   renderMatchups();
+  renderPlays();
   renderDfs();
   renderWeather();
   renderBacktest();
@@ -1641,6 +1765,7 @@ function setTab(tab) {
   const u = new URL(location.href); u.searchParams.set('tab', tab); history.replaceState(null, '', u);
   // Charts measure their container, so draw the weather tab once it is visible.
   if (tab === 'weather') renderWeather();
+  if (tab === 'plays') loadPlays();
   if (tab === 'backtest') { renderBacktest(); if (!S.grades && !S.gradesLoading) loadGrades(); }
 }
 
@@ -1667,6 +1792,9 @@ document.addEventListener('click', e => {
     if (id === 'btEvents') { S.btEvents = Number(v); renderBacktest(); }
     if (id === 'dkMode') { S.dkMode = v; S.dkResult = null; renderDfs(); }
     if (id === 'dkDraw') { S.dkDraw = v; renderDfs(); }
+    if (id === 'pRound') { S.pRound = Number(v); renderPlays(); }
+    if (id === 'pMarket') { S.pMarket = v; renderPlays(); }
+    if (id === 'pParlay') { S.pParlay = v; renderPlays(); }
     if (id === 'autoSize') { S.autoSize = Number(v); S.autoRes = null; renderMatchups(); }
     return;
   }
@@ -1721,6 +1849,7 @@ function navigate() {
   if (S.event) u.searchParams.set('event', S.event); else u.searchParams.delete('event');
   history.replaceState(null, '', u);
   S.data = S.weather = S.backtest = null; S.book = null; S.mRound = null; S.errors = {};
+  S.plays = null; S.playsKey = null; S.pRound = null;
   S.slip = []; S.parlay = null; S.autoRes = null; S.salaries = null; S.dkResult = null; S.dkLocks = new Set(); S.dkExcludes = new Set();
   renderAll(); load();
 }
@@ -1757,10 +1886,11 @@ async function load(force = false) {
   if (S.salaries) resolveSalaries();
   $('#refresh').classList.remove('spin');
   renderAll();
+  if (S.tab === 'plays') loadPlays(force);
   if (!S.event && S.data) { const sel = $('#eventSelect'); if ([...sel.options].some(o => o.value === S.data.event.id)) sel.value = S.data.event.id; }
 }
 
-setTab(['odds', 'matchups', 'dfs', 'weather', 'backtest'].includes(S.tab) ? S.tab : 'odds');
+setTab(['odds', 'plays', 'matchups', 'dfs', 'weather', 'backtest'].includes(S.tab) ? S.tab : 'odds');
 renderAll();
 loadEvents();
 load();
