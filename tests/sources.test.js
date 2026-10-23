@@ -206,3 +206,16 @@ test('R1 start hole inferred from R2 so same-time groups on 1 and 10 stay apart'
     assert.deepStrictEqual(g.map(x => [x.startHole, x.ids.length]).sort(), [[1, 3], [10, 3]]);
   } finally { global.fetch = real; }
 });
+
+test('team events never become rating history', () => {
+  const { isTeamEvent } = require('../lib/store');
+  const fx = leaderboardFixture();
+  fx.events[0].name = 'Zurich Classic of New Orleans';
+  const ev = parseLeaderboard(fx, 'pga');
+  assert.ok(isTeamEvent(ev));
+  assert.strictEqual(roundsFromEvent(ev).length, 0);
+  // Unnamed (team) competitors flag it even without a known event name.
+  const fx2 = leaderboardFixture();
+  fx2.events[0].competitions[0].competitors.forEach(c => { delete c.athlete; c.team = { displayName: 'A/B' }; });
+  assert.ok(isTeamEvent(parseLeaderboard(fx2, 'pga')));
+});

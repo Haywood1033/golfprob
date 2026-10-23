@@ -43,7 +43,7 @@
   --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body { background: var(--bg); color: var(--ink); font: 400 14px/1.5 var(--font); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
@@ -1243,7 +1243,7 @@ function renderBacktest() {
 
 async function runBacktestNow() {
   S.btLoading = true; S.errors.backtest = null; renderBacktest();
-  try { S.backtest = await api(`/api/backtest?events=${S.btEvents}`); }
+  try { S.backtest = await api(`/api/backtest?events=${S.btEvents}&t=${Date.now()}`); }
   catch (err) { S.errors.backtest = err.message; }
   S.btLoading = false; renderBacktest();
 }
