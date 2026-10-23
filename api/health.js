@@ -7,7 +7,7 @@ const { tourParam, send } = require('./_util');
 
 async function check(name, fn) {
   const t = Date.now();
-  try { return { name, ok: true, ms: Date.now() - t, ...(await fn()) }; }
+  try { const out = await fn(); return { name, ok: true, ms: Date.now() - t, ...out }; }
   catch (err) { return { name, ok: false, ms: Date.now() - t, error: err.message }; }
 }
 

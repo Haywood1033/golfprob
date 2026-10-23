@@ -38,14 +38,15 @@ top-N, make-cut, 2-balls and 3-balls can never contradict each other.
 
 ## Status — what's verified and what isn't
 
-- ✅ **15 tests pass** (`npm test`) on synthetic data with known ground truth: fixed effects recover
+- ✅ **18 tests pass** (`npm test`) on synthetic data with known ground truth: fixed effects recover
   true skill across strong/weak fields, no leakage, probabilities sum correctly (one winner, top-10
   dead-heat shares sum to 10), 3-ball prices match brute force, wave costs move the right players,
   and an end-to-end run of every route with mocked ESPN/Open-Meteo.
-- ⚠️ **ESPN and Open-Meteo are not yet verified live** — both are blocked from the dev sandbox
-  (same as nflprob). The ESPN parser reads every field through fallbacks. **After deploying, open
-  `/api/health`** — it reports which ESPN fields resolved on the real response, so the parser can be
-  tightened in one pass.
+- ✅ **ESPN and Open-Meteo confirmed reachable from the deployment** (`/api/health`, Oct 23 2026).
+  Findings applied: the leaderboard has per-round strokes / to-par / nine totals but **no
+  hole-by-hole detail**; the competition's round number lags the players' own; only the current
+  round carries a start hole. Rounds in progress are rebuilt from the course's hole pars + today's
+  to-par. Hole-by-hole (needed for DK scoring) will come from ESPN's core API in the DFS step.
 - ⚠️ The weather cost coefficients are a stated heuristic (v0). Calibrate them against stored wave
   splits once a season of tee times is in the database.
 - ⚠️ Backtests don't apply weather yet (no stored tee times for past events).

@@ -132,3 +132,77 @@ test('weather: Thursday afternoon wind -> AM/PM draw favored, write-up says so',
     assert.match(text, /veers from S/);
   } finally { global.fetch = realFetch; }
 });
+
+// The live leaderboard shape confirmed by /api/health on 2026-10-23: no hole-by-hole detail,
+// competition period lagging the players' own period, nine totals on completed rounds.
+function liveShapeFixture() {
+  const holes = [4, 5, 3, 4, 4, 4, 5, 3, 4, 4, 4, 4, 3, 4, 4, 3, 5, 4].map((par, i) => ({ number: i + 1, shotsToPar: par }));
+  const comp = (id, period, thru, startHole, rounds) => ({
+    id, athlete: { displayName: `P${id}` }, score: { displayValue: '-2' },
+    status: { period, thru, startHole, teeTime: '2026-10-23T11:30Z', type: { name: 'STATUS_IN_PROGRESS' }, position: { displayName: 'T5' } },
+    linescores: rounds,
+  });
+  return {
+    events: [{
+      id: '401850917', name: 'Butterfield Bermuda Championship', date: '2026-10-22T04:00Z', endDate: '2026-10-25T04:00Z',
+      status: { type: { state: 'in' } }, tournament: { numberOfRounds: 4, cutRound: 2, cutCount: 65 },
+      courses: [{ name: 'Port Royal Golf Course', shotsToPar: 71, holes, address: { city: 'Southampton Parish', country: 'Bermuda' } }],
+      competitions: [{ status: { period: 1 }, competitors: [
+        // Finished R1 (69), R2 not started.
+        comp('1', 2, 0, 1, [{ period: 1, value: 69, displayValue: '-2', outScore: 35, inScore: 34, teeTime: '2026-10-22T16:00Z' }, { period: 2, value: 0, displayValue: '-', teeTime: '2026-10-23T11:30Z' }]),
+        // R1 72, R2 in progress: started on 10, thru 9, -2 today.
+        comp('2', 2, 9, 10, [{ period: 1, value: 72, displayValue: '+1' }, { period: 2, value: 32, displayValue: '-2' }]),
+        // Finished R1 known only by to-par.
+        comp('3', 2, 0, 1, [{ period: 1, displayValue: 'E' }]),
+      ] }],
+    }],
+  };
+}
+
+test('live ESPN shape: rounds finished by player period, partial round from hole pars', () => {
+  const ev = parseLeaderboard(liveShapeFixture(), 'pga');
+  assert.strictEqual(ev.currentRound, 2, 'event round follows the players, not the lagging competition period');
+  assert.strictEqual(ev.cut.count, 65);
+  const [a, b, c] = ev.players;
+  assert.deepStrictEqual([a.rounds[0].complete, a.rounds[0].strokes], [true, 69]);
+  assert.strictEqual(a.rounds[1].complete, false);
+  assert.strictEqual(a.rounds[1].partialStrokes, null);
+  // Back nine par: 4+4+4+3+4+4+3+5+4 = 35, so thru 9 at -2 is 33 strokes; front nine par 36 left.
+  assert.deepStrictEqual([b.rounds[0].strokes, b.rounds[1].partialStrokes, b.rounds[1].thruHoles, b.rounds[1].remainingPar], [72, 33, 9, 36]);
+  assert.deepStrictEqual(b.rounds[1].playedHoles, [10, 11, 12, 13, 14, 15, 16, 17, 18]);
+  assert.deepStrictEqual([c.rounds[0].complete, c.rounds[0].strokes], [true, 71]);
+});
+
+test('simulator projects only the remaining holes of a partial round', () => {
+  const { simulate } = require('../lib/simulator');
+  const ev = parseLeaderboard(liveShapeFixture(), 'pga');
+  const players = ev.players.map(p => ({ ...p, rating: { sg: 0, sd: 2.8, se: 0 } }));
+  const sim = simulate({ players, par: 71, courseOffset: 0, numberOfRounds: 4, cut: null, sims: 4000, seed: 1 });
+  const S = sim.sims, r2 = sim.roundScores[1], i = sim.index.get('2');
+  let sum = 0, sq = 0;
+  for (let s = 0; s < S; s++) { const v = r2[s + i * S]; sum += v; sq += v * v; }
+  const mean = sum / S, sd = Math.sqrt(sq / S - mean * mean);
+  assert.ok(Math.abs(mean - 69) < 0.3, `33 thru 9 + front-nine par 36 ≈ 69, got ${mean.toFixed(2)}`);
+  assert.ok(sd < 2.6, `half a round of noise, got sd ${sd.toFixed(2)}`);
+});
+
+test('R1 start hole inferred from R2 so same-time groups on 1 and 10 stay apart', async () => {
+  const { clearCache } = require('../lib/http');
+  clearCache();
+  const fx = liveShapeFixture();
+  const comps = fx.events[0].competitions[0].competitors;
+  comps.length = 0;
+  // Two R1 groups at 12:00 local (16:00Z), one off each tee; R2 tees posted with flipped holes.
+  for (let i = 0; i < 6; i++) comps.push({ id: `g${i}`, athlete: { displayName: `G${i}` }, status: { period: 2, thru: 0, startHole: i < 3 ? 10 : 1, teeTime: '2026-10-23T11:30Z', type: { name: 'X' } },
+    linescores: [{ period: 1, value: 70, teeTime: '2026-10-22T16:00Z' }, { period: 2, value: 0 }] });
+  for (let i = 0; i < 30; i++) comps.push({ id: `f${i}`, athlete: { displayName: `F${i}` }, status: { period: 2, thru: 0, startHole: 1, teeTime: new Date(Date.UTC(2026, 9, 23, 11 + Math.floor(i / 3), 0)).toISOString(), type: { name: 'X' } },
+    linescores: [{ period: 1, value: 71, teeTime: new Date(Date.UTC(2026, 9, 22, 11 + Math.floor(i / 3), 0)).toISOString() }, { period: 2, value: 0 }] });
+  const real = global.fetch;
+  global.fetch = async u => ({ ok: true, status: 200, json: async () => (String(u).includes('leaderboard') ? fx : { results: [] }) });
+  try {
+    const { loadEventContext } = require('../lib/tournament');
+    const ctx = await loadEventContext({ tour: 'pga', eventId: '401850917', lat: 32.26, lon: -64.86 });
+    const g = ctx.sheets[1].groups.filter(x => x.ids.some(id => id.startsWith('g')));
+    assert.deepStrictEqual(g.map(x => [x.startHole, x.ids.length]).sort(), [[1, 3], [10, 3]]);
+  } finally { global.fetch = real; }
+});
