@@ -16,6 +16,9 @@ module.exports = async (req, res) => {
       if (Date.now() > deadline) break;
       results.push(await syncSeason(tour, season, { deadline }));
     }
-    send(res, 200, { season, results });
+    // The weekly cron also grades last week's locked projections.
+    let grading = null;
+    if (param(req, 'cron')) grading = await require('../lib/grading').gradeAll({ deadline: Date.now() + 10000 }).then(g => g.newlyGraded).catch(err => ({ error: err.message }));
+    send(res, 200, { season, results, grading });
   } catch (err) { fail(res, err); }
 };

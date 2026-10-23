@@ -143,13 +143,13 @@ main.wrap { padding-top: 24px; padding-bottom: 64px; }
 /* ── Tables ── */
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
 table.data { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
-.data th { position: sticky; top: 0; background: var(--surface-2); color: var(--ink-3); font-size: 12px; font-weight: 600; text-align: right; padding: 0 12px; height: 38px; border-bottom: 1px solid var(--line); white-space: nowrap; user-select: none; }
+.data th { position: sticky; top: 0; background: var(--surface-2); color: var(--ink-3); font-size: 12px; font-weight: 600; text-align: right; padding: 0 10px; height: 38px; border-bottom: 1px solid var(--line); white-space: nowrap; user-select: none; }
 .data th.l, .data td.l { text-align: left; }
 .data th.sortable { cursor: pointer; }
 .data th.sortable:hover { color: var(--ink); }
 .data th[aria-sort] { color: var(--ink); }
 .data th .arrow { display: inline-block; width: 10px; margin-left: 3px; color: var(--accent); }
-.data td { padding: 0 12px; height: 52px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.data td { padding: 0 10px; height: 52px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .data tbody tr:last-child td { border-bottom: 0; }
 .data tbody tr.clickable { cursor: pointer; }
 .data tbody tr.clickable:hover td { background: var(--surface-2); }
@@ -206,6 +206,33 @@ table.data { width: 100%; border-collapse: separate; border-spacing: 0; font-siz
 .mrow.fav .nm { font-weight: 700; }
 .mbar { height: 3px; border-radius: 2px; background: var(--s1); margin-top: 4px; }
 .group-f { padding: 8px 14px; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line); }
+.mrow.pickable { cursor: pointer; }
+.mrow.pickable:hover { background: var(--surface-2); }
+.mrow.picked { background: var(--accent-wash); box-shadow: inset 3px 0 0 var(--accent); }
+.mrow .add { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-right: 6px; border-radius: 4px; border: 1px solid var(--line-2); color: var(--ink-3); font-size: 13px; line-height: 1; vertical-align: -3px; }
+.mrow.picked .add { background: var(--accent); border-color: var(--accent); color: #062420; }
+.slip-legs { display: grid; gap: 0; }
+.slip-leg { display: grid; grid-template-columns: 1fr auto auto auto; gap: 14px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.slip-leg:last-child { border-bottom: 0; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1px; background: var(--line); border-top: 1px solid var(--line); }
+.stats > div { background: var(--surface); padding: 12px 16px; }
+.stats .k { font-size: 12px; color: var(--ink-3); }
+.stats .v { font-size: 17px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.stats .v small { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-left: 4px; }
+.auto-row { display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 14px; align-items: center; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 13px; }
+@media (max-width: 720px) { .auto-row { grid-template-columns: 1fr auto; } .auto-row .hide-sm { display: none; } .slip-leg { grid-template-columns: 1fr auto auto; } .slip-leg .hide-sm { display: none; } }
+.lineups { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.lu-row { display: grid; grid-template-columns: 1fr 64px 52px; gap: 8px; padding: 7px 14px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.lu-row > :not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.lu-row.head { font-size: 11.5px; color: var(--ink-3); font-weight: 600; }
+.lu-f { display: flex; justify-content: space-between; padding: 9px 14px; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lk { display: inline-flex; gap: 4px; }
+.lk button { width: 26px; height: 24px; border-radius: 5px; border: 1px solid var(--line-2); background: none; color: var(--ink-3); font-size: 12px; font-weight: 700; }
+.lk button:hover { color: var(--ink); border-color: var(--ink-3); }
+.lk button.on-lock { background: var(--pos-wash); border-color: rgba(74, 222, 128, 0.5); color: var(--pos); }
+.lk button.on-ex { background: var(--neg-wash); border-color: rgba(248, 113, 113, 0.5); color: var(--neg); }
+.progress { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; margin-top: 10px; }
+.progress > i { display: block; height: 100%; background: var(--accent); transition: width 0.2s; }
 .edge-pos { color: var(--pos); font-weight: 600; }
 .edge-neg { color: var(--ink-3); }
 .drop { border: 1px dashed var(--line-2); border-radius: var(--r); padding: 18px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; color: var(--ink-2); font-size: 13px; }
@@ -312,6 +339,7 @@ details.more[open] summary::before { transform: rotate(90deg); }
   <div class="wrap" role="tablist">
     <button class="tab" role="tab" data-tab="odds" aria-selected="true">Finishing odds</button>
     <button class="tab" role="tab" data-tab="matchups" aria-selected="false">Matchups</button>
+    <button class="tab" role="tab" data-tab="dfs" aria-selected="false">DraftKings</button>
     <button class="tab" role="tab" data-tab="weather" aria-selected="false">Weather</button>
     <button class="tab" role="tab" data-tab="backtest" aria-selected="false">Model &amp; backtest</button>
   </div>
@@ -320,6 +348,7 @@ details.more[open] summary::before { transform: rotate(90deg); }
 <main class="wrap">
   <section class="panel" id="panel-odds" role="tabpanel"></section>
   <section class="panel" id="panel-matchups" role="tabpanel" hidden></section>
+  <section class="panel" id="panel-dfs" role="tabpanel" hidden></section>
   <section class="panel" id="panel-weather" role="tabpanel" hidden></section>
   <section class="panel" id="panel-backtest" role="tabpanel" hidden></section>
 </main>
@@ -344,6 +373,10 @@ const S = {
   wxDay: 0,
   btMarket: 'top20', btEvents: 8, btLoading: false,
   book: null, // { fileName, rows: [{market, round, name, odds}] }
+  slip: [], parlay: null, parlayBusy: false, parlayErr: null, autoSize: 3, autoRes: null, autoBusy: false,
+  salaries: null, dkMode: 'balanced', dkCount: 20, dkExposure: 0.5, dkUnique: 2, dkDraw: 'all', dkLocks: new Set(), dkExcludes: new Set(),
+  dkSort: { key: 'proj', dir: -1 }, dkQ: '', dkResult: null, dkBusy: false, dkProgress: null,
+  grades: null, gradesErr: null, gradesLoading: false,
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────────────────
@@ -435,6 +468,17 @@ async function api(path) {
   if (!res.ok) throw new Error(body?.error || `${res.status} ${res.statusText}`);
   return body;
 }
+
+async function apiPost(path, body) {
+  const res = await fetch(`${path}${path.includes('?') ? '&' : '?'}tour=${encodeURIComponent(S.tour)}${S.event ? `&event=${encodeURIComponent(S.event)}` : ''}`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+  });
+  let out = null;
+  try { out = await res.json(); } catch { /* non-JSON error page */ }
+  if (!res.ok) throw new Error(out?.error || `${res.status} ${res.statusText}`);
+  return out;
+}
+const decToAmerican = d => (!d || d <= 1 ? '—' : d >= 2 ? `+${Math.round((d - 1) * 100)}` : `−${Math.round(100 / (d - 1))}`);
 
 function stateHtml(kind, title, text, detail) {
   return `<div class="card state ${kind === 'err' ? 'err' : ''}"><h3>${esc(title)}</h3><p>${text}</p>${detail ? `<pre>${esc(detail)}</pre>` : ''}</div>`;
@@ -530,6 +574,25 @@ function outrightBook(marketKey) {
   return { map, devig: k !== 1 };
 }
 
+// Leaderboard position helpers for the live / final view.
+function posNum(p) {
+  if (['CUT', 'WD', 'DQ', 'MDF'].includes(p.status)) return 900 + ['MDF', 'CUT', 'WD', 'DQ'].indexOf(p.status);
+  const m = String(p.position || '').match(/\d+/);
+  return m ? Number(m[0]) : 800;
+}
+function thruLabel(p) {
+  if (p.status !== 'ACTIVE') return p.status;
+  if (p.thru === 18) return 'F';
+  if (p.thru > 0) return `thru ${p.thru}`;
+  const t = p.tee?.[p.round];
+  return t ? t.local : '—';
+}
+function posCell(p) {
+  const rounds = (p.rounds || []).filter(r => r.complete || r.thru).map(r => `R${r.round} ${r.complete ? r.strokes : `${r.toPar > 0 ? '+' : ''}${r.toPar ?? ''} thru ${r.thru}`}`).join(' · ');
+  const out = p.status !== 'ACTIVE';
+  return `<td class="l" data-tip="${esc(rounds || 'No holes played yet')}"><div class="pname" style="${out ? 'color:var(--ink-3)' : ''}">${esc(out ? p.status : p.position || '—')}</div><div class="psub">${esc(p.toPar ?? '')}${p.toPar ? ' · ' : ''}${esc(thruLabel(p))}</div></td>`;
+}
+
 function renderOdds() {
   const el = $('#panel-odds');
   const d = S.data;
@@ -543,10 +606,12 @@ function renderOdds() {
   const draw = d.model.draw;
   const book = outrightBook(S.market);
   const mk = MARKETS.find(m => m.key === S.market);
+  const live = d.event.state !== 'pre';
   const val = (p, key) => {
     if (key === 'name') return p.name;
     if (key === 'sg') return p.model.sg;
     if (key === 'avgFinish') return p.odds?.avgFinish ?? 999;
+    if (key === 'pos') return posNum(p);
     if (key === 'edge') { const b = book?.map.get(p.id); return b ? (S.market === 'makeCut' ? p.odds.makeCut : p.odds[S.market]) - b.fair : -9; }
     return p.odds ? p.odds[key] : -1;
   };
@@ -604,7 +669,8 @@ function renderOdds() {
       <table class="data">
         <thead><tr>
           <th class="rank sticky-1">#</th>
-          <th class="l sticky-2 sortable" data-sort="name" style="min-width:230px">Player</th>
+          <th class="l sticky-2 sortable" data-sort="name" style="min-width:205px">Player</th>
+          ${live ? th({ key: 'pos', label: 'Pos', l: true, tip: 'Current leaderboard position, total to par, and holes completed this round' }) : ''}
           ${cols.map(th).join('')}
           ${book ? `<th data-tip="Book price for ${esc(mk.label)} from your uploaded file">Book</th>${th({ key: 'edge', label: 'Edge', tip: `Model minus book ${book.devig ? 'no-vig ' : ''}implied probability` })}` : ''}
           <th class="l">Signals</th>
@@ -620,6 +686,7 @@ function renderOdds() {
             return `<tr class="clickable" data-id="${esc(p.id)}" tabindex="0">
               <td class="rank sticky-1">${players.indexOf(p) + 1}</td>
               <td class="l sticky-2"><div class="pname">${esc(p.name)}${p.amateur ? ' <span class="muted">(a)</span>' : ''}</div><div class="psub">${drawTag(p)}</div></td>
+              ${live ? posCell(p) : ''}
               ${cell('sg', signed(p.model.sg))}
               ${cell('win', probOut(o.win))}
               ${cell('top5', probOut(o.top5))}
@@ -1002,6 +1069,7 @@ function renderMatchups() {
 
     ${!rounds.length ? stateHtml('', 'Tee times aren’t posted yet', 'Groupings usually come out Tuesday afternoon for a Thursday start. 2-ball and 3-ball prices appear here as soon as ESPN posts the tee sheet.') : `
     ${cur.inferred ? `<p class="note" style="margin-bottom:12px"><b>R${cur.round} is projected:</b> PGA Tour groups stay together for the first two rounds with the waves swapped, so these are R1’s groups at their expected R2 times. They’ll update when the official sheet posts.</p>` : ''}
+    ${parlayHtml(cur)}
     <div class="groups">
       ${filtered.map(g => {
         const best = Math.max(...g.rows.map(p => p.prob ?? 0));
@@ -1011,8 +1079,9 @@ function renderMatchups() {
           <div class="mrow head ${withBook ? 'with-book' : ''}"><span>Player</span><span>Model</span>${withBook ? '<span>Book</span><span>Fair</span><span>Edge</span>' : '<span>SG / rd</span>'}</div>
           ${g.rows.map(p => {
             const pl = d.players.find(x => x.id === p.id);
-            return `<div class="mrow ${withBook ? 'with-book' : ''} ${p.prob === best ? 'fav' : ''}">
-              <span class="nm" title="${esc(p.name)}">${esc(p.name)}<div class="mbar" style="width:${Math.round((p.prob ?? 0) * 100)}%"></div></span>
+            const picked = S.slip.some(l => l.round === cur.round && l.id === p.id);
+            return `<div class="mrow pickable ${withBook ? 'with-book' : ''} ${p.prob === best ? 'fav' : ''} ${picked ? 'picked' : ''}" data-leg="${cur.round}|${esc(p.id)}" role="button" tabindex="0" aria-pressed="${picked}" title="${picked ? 'Remove from parlay' : 'Add to parlay'}">
+              <span class="nm"><span class="add" aria-hidden="true">${picked ? '✓' : '+'}</span>${esc(p.name)}<div class="mbar" style="width:${Math.round((p.prob ?? 0) * 100)}%"></div></span>
               <span>${probOut(p.prob)}</span>
               ${withBook ? `<span class="dim">${p.bk ? esc(p.bk.raw) : '—'}</span><span class="dim">${p.fair !== undefined ? pct(p.fair, 0) : '—'}</span><span class="${p.edge > 0.005 ? 'edge-pos' : 'edge-neg'}">${p.edge !== undefined ? `${p.edge > 0 ? '+' : '−'}${Math.abs(p.edge * 100).toFixed(1)}` : '—'}</span>` : `<span class="muted">${pl ? signed(pl.model.sg) : '—'}</span>`}
             </div>`;
@@ -1023,6 +1092,87 @@ function renderMatchups() {
     </div>
     <p class="note foot">3-ball probabilities are dead-heat adjusted: a shared low score splits the stake, as books settle it. 2-balls show win probability with ties removed (a tie is a push). Weather mostly cancels within a group, because everyone plays the same holes at the same time.</p>`}`;
   wireDrop();
+}
+
+// ── Parlay builder ───────────────────────────────────────────────────────────────────────
+function legInfo(l) {
+  const m = S.data?.matchups.find(x => x.round === l.round);
+  const g = m?.groups.find(x => x.players.some(p => p.id === l.id));
+  const p = g?.players.find(x => x.id === l.id);
+  return g && p ? { group: g, prob: g.size === 2 ? p.noPush : p.deadHeat, name: p.name, inferred: m.inferred } : null;
+}
+const legBook = l => groupBookIndex(l.round)?.get(l.id) || null;
+
+function parlayHtml() {
+  const legs = S.slip, r = S.parlay, a = S.autoRes;
+  const legRows = legs.map((l, i) => {
+    const info = legInfo(l), bk = legBook(l);
+    return `<div class="slip-leg">
+      <div><div class="pname">${esc(info?.name || l.id)}</div><div class="psub">R${l.round}${info?.inferred ? ' (projected)' : ''} · ${info ? `${info.group.size}-ball · ${esc(info.group.local)} · Tee ${info.group.startHole}` : 'group not found'}</div></div>
+      <span class="num">${info ? probOut(info.prob) : '—'}</span>
+      <span class="num muted hide-sm">${bk ? esc(bk.raw) : 'no book'}</span>
+      <button class="icon-btn" data-unleg="${i}" aria-label="Remove leg" style="width:28px;height:28px">${ICON.close}</button>
+    </div>`;
+  }).join('');
+  const stats = r ? `<div class="stats">
+      <div><div class="k">Model probability</div><div class="v">${pct(r.joint)}</div></div>
+      <div><div class="k">If legs were independent</div><div class="v">${pct(r.independent)}</div></div>
+      <div><div class="k" data-tip="Joint ÷ independent. Above 1 means the legs tend to hit together (same wave, same player's week).">Correlation</div><div class="v">${r.lift ? `${r.lift.toFixed(2)}×` : '—'}</div></div>
+      <div><div class="k">Fair odds</div><div class="v">${decToAmerican(r.fairDecimal)}</div></div>
+      <div><div class="k">Book (combined)</div><div class="v">${r.bookDecimal ? decToAmerican(r.bookDecimal) : '—'}${r.bookDecimal ? '' : '<small>needs odds for every leg</small>'}</div></div>
+      <div><div class="k">EV per $1</div><div class="v ${r.ev > 0 ? 'edge-pos' : ''}">${r.ev === null ? '—' : `${r.ev >= 0 ? '+' : '−'}$${Math.abs(r.ev).toFixed(2)}`}</div></div>
+    </div>` : '';
+  const autoRows = a ? (a.parlays.length ? a.parlays.map((x, i) => `<div class="auto-row">
+      <div><div class="pname">${x.legs.map(l => esc(S.data.players.find(p => p.id === l.id)?.name || l.id)).join(' + ')}</div><div class="psub">${x.legs.map(l => `${l.group.size}-ball ${esc(l.group.local)}`).join(' · ')}</div></div>
+      <span class="num" data-tip="Model probability all legs cash">${pct(x.joint)}</span>
+      <span class="num muted hide-sm">${decToAmerican(x.fairDecimal)}</span>
+      <span class="num hide-sm ${x.ev > 0 ? 'edge-pos' : 'muted'}">${x.ev === null ? '' : `EV ${x.ev >= 0 ? '+' : '−'}$${Math.abs(x.ev).toFixed(2)}`}</span>
+      <button class="btn" data-use="${i}">Use</button>
+    </div>`).join('') : `<div class="card-b note">${esc(a.note || 'No parlays found.')}</div>`) : '';
+  return `<div class="card" style="margin-bottom:16px">
+    <div class="card-h"><h2>Parlay builder</h2><span class="sub">Tap players in the groups below to add legs</span></div>
+    ${legs.length ? `<div class="slip-legs">${legRows}</div>
+      <div style="display:flex;gap:10px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)">
+        <button class="btn primary" id="priceSlip" ${S.parlayBusy ? 'disabled' : ''}>${S.parlayBusy ? 'Pricing…' : `Price ${legs.length}-leg parlay`}</button>
+        <button class="btn ghost" id="clearSlip">Clear</button>
+        ${S.parlayErr ? `<span class="note" style="color:var(--neg)">${esc(S.parlayErr)}</span>` : ''}
+      </div>${stats}`
+    : '<div class="card-b note">No legs yet. Each leg is a player beating their group in one round. Legs are priced together inside the simulation, so two players in the same wave, or one player in both rounds, aren’t treated as independent.</div>'}
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)">
+      <strong style="font-size:13px">Auto-build</strong>
+      <div class="seg" id="autoSize">${[2, 3, 4].map(n => `<button aria-pressed="${S.autoSize === n}" data-v="${n}">${n} legs</button>`).join('')}</div>
+      <button class="btn" id="autoBuild" ${S.autoBusy ? 'disabled' : ''}>${S.autoBusy ? 'Building…' : `Best R${S.mRound} parlays`}</button>
+      <span class="note">${groupBookIndex(S.mRound) ? 'Ranked by EV against your uploaded prices.' : 'No book prices for this round, so these rank by model probability (the most likely parlays, not the best value).'}</span>
+    </div>
+    ${autoRows}
+  </div>`;
+}
+function toggleLeg(round, id) {
+  const i = S.slip.findIndex(l => l.round === round && l.id === id);
+  if (i >= 0) S.slip.splice(i, 1);
+  else {
+    // A second player from the same group and round replaces the first — they can't both win.
+    const info = legInfo({ round, id });
+    const clash = S.slip.findIndex(l => l.round === round && info?.group.players.some(p => p.id === l.id));
+    if (clash >= 0) S.slip.splice(clash, 1);
+    S.slip.push({ round, id });
+  }
+  S.parlay = null; S.parlayErr = null;
+  renderMatchups();
+}
+async function priceSlip() {
+  S.parlayBusy = true; S.parlayErr = null; renderMatchups();
+  try { S.parlay = await apiPost('/api/parlay', { legs: S.slip.map(l => ({ ...l, dec: legBook(l)?.dec || null })) }); }
+  catch (err) { S.parlayErr = err.message; S.parlay = null; }
+  S.parlayBusy = false; renderMatchups();
+}
+async function autoBuild() {
+  S.autoBusy = true; renderMatchups();
+  const bk = groupBookIndex(S.mRound);
+  const candidates = bk ? [...bk.values()].map(r => ({ round: S.mRound, id: r.player.id, dec: r.dec })) : [];
+  try { S.autoRes = await apiPost('/api/parlay', { auto: { round: S.mRound, size: S.autoSize, count: 5 }, candidates }); }
+  catch (err) { S.autoRes = { parlays: [], note: err.message }; }
+  S.autoBusy = false; renderMatchups();
 }
 
 function parseCsv(text) {
@@ -1081,6 +1231,191 @@ function wireDrop() {
   ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
   ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
   drop.addEventListener('drop', e => e.dataTransfer.files[0] && loadBookFile(e.dataTransfer.files[0]));
+}
+
+
+// ── DraftKings Classic ───────────────────────────────────────────────────────────────────
+const DK_MODES = { projection: { label: 'Projection', w: 0, tip: 'Mean DK points — cash games' }, balanced: { label: 'Balanced', w: 0.5, tip: 'Halfway between mean and 90th-percentile outcome' }, ceiling: { label: 'Ceiling', w: 1, tip: '90th-percentile outcome — large-field tournaments' } };
+const dkKey = () => `golfprob-dk-${S.tour}-${S.data?.event.id}`;
+
+function loadSalaryFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const rows = parseCsv(String(reader.result));
+    const head = rows[0].map(h => h.trim().toLowerCase());
+    const iName = head.indexOf('name'), iId = head.indexOf('id'), iSal = head.indexOf('salary'), iNameId = head.indexOf('name + id');
+    if (iName < 0 || iSal < 0) { alert('This doesn’t look like a DraftKings salary file. It needs “Name” and “Salary” columns (DKSalaries.csv from the contest’s Export to CSV).'); return; }
+    S.salaries = { fileName: file.name, raw: rows.slice(1).map(r => ({ name: r[iName], id: iId >= 0 ? r[iId] : '', nameId: iNameId >= 0 ? r[iNameId] : '', salary: Number(String(r[iSal]).replace(/[$,]/g, '')) })).filter(r => r.name && r.salary > 0) };
+    resolveSalaries();
+    try { localStorage.setItem(dkKey(), JSON.stringify({ fileName: S.salaries.fileName, raw: S.salaries.raw })); } catch { /* storage unavailable */ }
+    S.dkResult = null;
+    renderDfs();
+  };
+  reader.readAsText(file);
+}
+function resolveSalaries() {
+  if (!S.salaries || !S.data) return;
+  const match = buildMatcher(S.data.players);
+  S.salaries.rows = S.salaries.raw.map(r => ({ ...r, player: match(r.name) }));
+}
+
+function dkPool() {
+  if (!S.data) return [];
+  const w = DK_MODES[S.dkMode].w;
+  const bySal = new Map((S.salaries?.rows || []).filter(r => r.player).map(r => [r.player.id, r]));
+  return S.data.players.filter(p => p.dk && p.status === 'ACTIVE').map(p => {
+    const sal = bySal.get(p.id);
+    return {
+      id: p.id, name: p.name, dkId: sal?.id || '', salary: sal?.salary || 0, draw: p.draw,
+      proj: p.dk.mean, ceil: p.dk.p90, floor: p.dk.p10, makeCut: p.odds?.makeCut, win: p.odds?.win,
+      points: p.dk.mean + w * (p.dk.p90 - p.dk.mean),
+    };
+  });
+}
+
+function renderDfs() {
+  const el = $('#panel-dfs');
+  const d = S.data;
+  if (!d) { el.innerHTML = S.errors.tournament ? stateHtml('err', 'DraftKings unavailable', 'The tournament model didn’t load.', S.errors.tournament) : '<div class="skel" style="height:420px"></div>'; return; }
+  const pool = dkPool();
+  const hasSal = !!S.salaries;
+  const unmatched = hasSal ? S.salaries.rows.filter(r => !r.player) : [];
+  const value = p => (p.salary ? p.points / (p.salary / 1000) : null);
+  const keyVal = (p, k) => (k === 'name' ? p.name : k === 'value' ? (value(p) ?? -1) : k === 'salary' ? p.salary : p[k] ?? -1);
+  let rows = pool.filter(p => (!S.dkQ || normName(p.name).includes(normName(S.dkQ))) && (!hasSal || p.salary));
+  rows.sort((a, b) => { const va = keyVal(a, S.dkSort.key), vb = keyVal(b, S.dkSort.key); return typeof va === 'string' ? S.dkSort.dir * va.localeCompare(vb) : S.dkSort.dir * (va - vb); });
+  const th = (k, label, tip, l) => `<th class="sortable${l ? ' l' : ''}" data-dksort="${k}" ${S.dkSort.key === k ? `aria-sort="${S.dkSort.dir < 0 ? 'descending' : 'ascending'}"` : ''} ${tip ? `data-tip="${esc(tip)}"` : ''}>${label}<span class="arrow">${S.dkSort.key === k ? (S.dkSort.dir < 0 ? '↓' : '↑') : ''}</span></th>`;
+  const r = S.dkResult;
+
+  el.innerHTML = `
+    <div class="drop" id="dkDrop" style="margin-bottom:16px">
+      <div style="flex:1;min-width:240px">
+        <div style="font-weight:600;color:var(--ink)">${hasSal ? `Salaries loaded: ${esc(S.salaries.fileName)}` : 'Upload your DraftKings salaries'}</div>
+        <div class="note" style="margin-top:2px">${hasSal ? `${S.salaries.rows.length} golfers · ${S.salaries.rows.length - unmatched.length} matched to the field${unmatched.length ? ` · <b>${unmatched.length} unmatched</b>: ${esc(unmatched.slice(0, 4).map(u => u.name).join(', '))}${unmatched.length > 4 ? '…' : ''}` : ''}. Saved in this browser for this event.` : 'In the DK contest lobby, open the contest and choose <b>Export to CSV</b> (DKSalaries.csv), then drop it here. Projections below already use DK Classic scoring.'}</div>
+      </div>
+      <label class="btn primary">${ICON.upload} ${hasSal ? 'Replace file' : 'Upload DKSalaries.csv'}<input type="file" id="dkFile" accept=".csv,text/csv" hidden></label>
+      ${hasSal ? '<button class="btn ghost" id="dkClear">Clear</button>' : ''}
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-h"><h2>Lineup builder</h2><span class="sub">6 golfers · $50,000 cap · each lineup is the exact best under your rules</span></div>
+      <div class="card-b" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+        <div class="ctl"><span class="seg-label">Optimize for</span><div class="seg" id="dkMode">${Object.entries(DK_MODES).map(([k, m]) => `<button aria-pressed="${S.dkMode === k}" data-v="${k}" data-tip="${esc(m.tip)}">${m.label}</button>`).join('')}</div></div>
+        <div class="ctl"><span class="seg-label">Lineups</span><select class="select" id="dkCount" style="height:32px">${[1, 3, 5, 10, 20, 50, 150].map(n => `<option ${S.dkCount === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+        <div class="ctl"><span class="seg-label">Max exposure</span><select class="select" id="dkExposure" style="height:32px">${[1, 0.75, 0.5, 0.35, 0.25].map(v => `<option value="${v}" ${S.dkExposure === v ? 'selected' : ''}>${Math.round(v * 100)}%</option>`).join('')}</select></div>
+        <div class="ctl"><span class="seg-label" data-tip="How many golfers each lineup must differ by from every other lineup">Unique</span><select class="select" id="dkUnique" style="height:32px">${[1, 2, 3].map(v => `<option value="${v}" ${S.dkUnique === v ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+        <div class="ctl"><span class="seg-label" data-tip="Restrict to one half of the tee-time draw — a weather stack">Draw</span><div class="seg" id="dkDraw">${['all', 'AM/PM', 'PM/AM'].map(v => `<button aria-pressed="${S.dkDraw === v}" data-v="${v}">${v === 'all' ? 'All' : v}</button>`).join('')}</div></div>
+        <span class="spacer" style="flex:1"></span>
+        <button class="btn primary" id="dkBuild" ${!hasSal || S.dkBusy ? 'disabled' : ''} ${!hasSal ? 'data-tip="Upload a salary file first"' : ''}>${S.dkBusy ? 'Building…' : 'Build lineups'}</button>
+      </div>
+      ${S.dkBusy && S.dkProgress ? `<div style="padding:0 16px 14px"><div class="note">Lineup ${S.dkProgress.built} of ${S.dkProgress.count}</div><div class="progress"><i style="width:${Math.round((S.dkProgress.built / S.dkProgress.count) * 100)}%"></i></div></div>` : ''}
+      ${S.dkLocks.size || S.dkExcludes.size ? `<div class="note" style="padding:0 16px 14px">${S.dkLocks.size} locked · ${S.dkExcludes.size} excluded · <a href="#" id="dkResetLx">reset</a></div>` : ''}
+    </div>
+
+    ${r ? dfsResultsHtml(r, pool) : ''}
+
+    <div class="toolbar">
+      <label class="search"><span class="sr-only">Search golfers</span>${ICON.search}<input id="dkq" type="search" placeholder="Search golfers" value="${esc(S.dkQ)}" autocomplete="off"></label>
+      <span class="spacer"></span>
+      <span class="count">${rows.length} golfers${hasSal ? ' with salaries' : ''}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr>
+          <th class="l" data-tip="Lock into every lineup / exclude from all">Lock · Out</th>
+          ${th('name', 'Golfer', '', true)}
+          ${hasSal ? th('salary', 'Salary') : ''}
+          ${th('proj', 'Proj', 'Mean DraftKings points across the simulations')}
+          ${th('floor', 'Floor', '10th percentile outcome')}
+          ${th('ceil', 'Ceiling', '90th percentile outcome')}
+          ${hasSal ? th('value', 'Pts / $1K', `${DK_MODES[S.dkMode].label} points per $1,000 of salary`) : ''}
+          ${th('makeCut', 'Make cut')}
+          ${th('win', 'Win')}
+          <th class="l">Draw</th>
+        </tr></thead>
+        <tbody>${rows.map(p => `<tr>
+          <td class="l"><span class="lk"><button class="${S.dkLocks.has(p.id) ? 'on-lock' : ''}" data-lock="${esc(p.id)}" aria-label="Lock ${esc(p.name)}" aria-pressed="${S.dkLocks.has(p.id)}">L</button><button class="${S.dkExcludes.has(p.id) ? 'on-ex' : ''}" data-ex="${esc(p.id)}" aria-label="Exclude ${esc(p.name)}" aria-pressed="${S.dkExcludes.has(p.id)}">✕</button></span></td>
+          <td class="l"><span class="pname">${esc(p.name)}</span></td>
+          ${hasSal ? `<td>$${p.salary.toLocaleString()}</td>` : ''}
+          <td class="${S.dkSort.key === 'proj' ? 'sorted' : ''}">${p.proj.toFixed(1)}</td>
+          <td class="dim">${p.floor.toFixed(1)}</td>
+          <td>${p.ceil.toFixed(1)}</td>
+          ${hasSal ? `<td class="${S.dkSort.key === 'value' ? 'sorted' : ''}">${value(p)?.toFixed(2) ?? '—'}</td>` : ''}
+          <td>${pct(p.makeCut, 0)}</td>
+          <td class="dim">${pct(p.win)}</td>
+          <td class="l">${p.draw ? `<span class="tag">${esc(p.draw)}</span>` : '<span class="muted">—</span>'}</td>
+        </tr>`).join('') || `<tr><td colspan="10" class="muted" style="height:80px;text-align:center">${hasSal ? 'No golfers match.' : 'No projections.'}</td></tr>`}</tbody>
+      </table>
+    </div>
+    <p class="note foot">DK points come from the same simulations as the finishing odds: each simulated round score is converted to expected DK hole points (eagles, birdies, bogeys, the birdie-streak and bogey-free bonuses) using the course’s actual hole pars, plus finish-position points and the all-rounds-under-70 bonus. Missed cuts score two rounds only. Golf has little lineup correlation beyond weather, so the draw filter is the main stacking tool.</p>`;
+  wireDfs();
+}
+
+function dfsResultsHtml(r, pool) {
+  const byId = new Map(pool.map(p => [p.id, p]));
+  const exposure = new Map();
+  r.lineups.forEach(l => l.players.forEach(p => exposure.set(p.id, (exposure.get(p.id) || 0) + 1)));
+  const exp = [...exposure.entries()].map(([id, n]) => ({ p: byId.get(id), n })).filter(x => x.p).sort((a, b) => b.n - a.n || b.p.salary - a.p.salary);
+  return `
+    ${r.reason ? `<div class="card state" style="padding:16px;margin-bottom:16px;text-align:left"><p style="margin:0;max-width:none"><b style="color:var(--warn)">${esc(r.reason)}</b></p></div>` : ''}
+    <div class="wx-two" style="grid-template-columns:minmax(0,1fr) 300px;margin-bottom:16px">
+      <div>
+        <div class="toolbar"><strong>${r.lineups.length} lineup${r.lineups.length === 1 ? '' : 's'}</strong><span class="note">${DK_MODES[r.mode].label} mode · ${(r.ms / 1000).toFixed(1)}s</span><span class="spacer"></span><button class="btn" id="dkExport">Download for DK upload</button></div>
+        <div class="lineups">${r.lineups.map((l, i) => `<div class="card">
+          <div class="group-h"><strong>Lineup ${i + 1}</strong><span class="tag" style="margin-left:auto">${l.players.reduce((s, p) => s + byId.get(p.id).proj, 0).toFixed(1)} pts</span></div>
+          <div class="lu-row head"><span>Golfer</span><span>Salary</span><span>Proj</span></div>
+          ${l.players.map(p => { const x = byId.get(p.id); return `<div class="lu-row"><span class="nm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${S.dkLocks.has(p.id) ? '🔒 ' : ''}${esc(x.name)}</span><span>$${x.salary.toLocaleString()}</span><span>${x.proj.toFixed(1)}</span></div>`; }).join('')}
+          <div class="lu-f"><span>$${l.salary.toLocaleString()} used · $${(50000 - l.salary).toLocaleString()} left</span><span>Ceiling ${l.players.reduce((s, p) => s + byId.get(p.id).ceil, 0).toFixed(0)}</span></div>
+        </div>`).join('')}</div>
+      </div>
+      <div class="card" style="align-self:start">
+        <div class="card-h"><h2>Exposure</h2><span class="sub">Across ${r.lineups.length} lineups</span></div>
+        <div class="table-wrap" style="border:0;border-radius:0 0 var(--r) var(--r);max-height:520px;overflow-y:auto"><table class="data"><thead><tr><th class="l">Golfer</th><th>Lineups</th><th>Usage</th></tr></thead>
+        <tbody>${exp.map(x => `<tr><td class="l">${esc(x.p.name)}<div class="psub">$${x.p.salary.toLocaleString()}</div></td><td>${x.n}</td><td class="sorted">${pct(x.n / r.lineups.length, 0)}</td></tr>`).join('')}</tbody></table></div>
+      </div>
+    </div>`;
+}
+
+function buildDfs() {
+  const pool = dkPool().filter(p => p.salary && (S.dkDraw === 'all' || p.draw === S.dkDraw || S.dkLocks.has(p.id)));
+  const opts = { count: S.dkCount, locks: [...S.dkLocks].filter(id => pool.some(p => p.id === id)), excludes: [...S.dkExcludes], maxExposure: S.dkCount > 1 && S.dkExposure < 1 ? S.dkExposure : 0, minUnique: S.dkCount > 1 ? S.dkUnique : 1, timeLimitMs: 45000 };
+  const slim = pool.map(({ id, name, salary, points }) => ({ id, name, salary, points }));
+  const t0 = performance.now(), mode = S.dkMode;
+  S.dkBusy = true; S.dkProgress = { built: 0, count: S.dkCount }; S.dkResult = null; renderDfs();
+  const finish = out => { S.dkBusy = false; S.dkProgress = null; S.dkResult = { ...out, mode, ms: performance.now() - t0 }; renderDfs(); };
+  try {
+    const worker = new Worker('/lib/dk-optimizer.js');
+    worker.onmessage = e => {
+      if (e.data.type === 'progress') { S.dkProgress = e.data; renderDfs(); }
+      if (e.data.type === 'done') { worker.terminate(); finish(e.data); }
+    };
+    worker.onerror = () => { worker.terminate(); runInline(); };
+    worker.postMessage({ pool: slim, opts });
+  } catch { runInline(); }
+  function runInline() {
+    const go = () => finish(window.DKOpt.buildLineups(slim, opts));
+    if (window.DKOpt) return setTimeout(go, 30);
+    const sc = Object.assign(document.createElement('script'), { src: '/lib/dk-optimizer.js', onload: go, onerror: () => finish({ lineups: [], reason: 'Couldn’t load the optimizer script.' }) });
+    document.head.appendChild(sc);
+  }
+}
+
+function exportDfs() {
+  const r = S.dkResult, pool = new Map(dkPool().map(p => [p.id, p]));
+  const lines = ['G,G,G,G,G,G', ...r.lineups.map(l => l.players.map(p => pool.get(p.id)?.dkId || pool.get(p.id)?.name).join(','))];
+  const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/csv' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `golfprob-dk-lineups-${S.data.event.id}.csv` });
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+function wireDfs() {
+  const drop = $('#dkDrop');
+  if (!drop) return;
+  $('#dkFile').addEventListener('change', e => e.target.files[0] && loadSalaryFile(e.target.files[0]));
+  $('#dkClear')?.addEventListener('click', () => { try { localStorage.removeItem(dkKey()); } catch {} S.salaries = null; S.dkResult = null; renderDfs(); });
+  ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => e.dataTransfer.files[0] && loadSalaryFile(e.dataTransfer.files[0]));
 }
 
 // ── Weather tab ──────────────────────────────────────────────────────────────────────────
@@ -1237,8 +1572,36 @@ function renderBacktest() {
       </div>
       <p class="note foot">Backtests don’t apply weather yet (no stored tee times for past events). Win is the hardest market — even a sharp model rarely beats the no-skill score by much there. Top 20 and make-cut are the honest test.</p>`;
   }
-  el.innerHTML = statusCard + body;
+  el.innerHTML = statusCard + gradesHtml() + body;
   if (bt && !S.btLoading && $('#calChart')) drawCalibration($('#calChart'), (bt.markets.find(m => m.key === S.btMarket) || bt.markets[0]).bins || []);
+}
+
+function gradesHtml() {
+  const g = S.grades;
+  const head = '<div class="card-h"><h2>Live track record</h2><span class="sub">Each week’s projection locked at the first tee time, graded when the event ends</span></div>';
+  if (S.gradesLoading && !g) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b"><div class="skel" style="height:40px"></div></div></div>`;
+  if (S.gradesErr) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b note" style="color:var(--neg)">${esc(S.gradesErr)}</div></div>`;
+  if (!g) return '';
+  if (!g.available) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b note">${esc(g.note)}</div></div>`;
+  const pending = g.events.filter(e => e.status === 'pending');
+  if (!g.eventsGraded) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b"><p class="note"><b>Nothing graded yet.</b> The pre-tournament projection is saved on every visit before an event starts, and the last one before the first tee time is graded once the event is final. Events with a saved projection: ${pending.length ? pending.map(e => esc(e.name)).join(', ') : 'none yet — visit the site before next week’s first round'}.</p></div></div>`;
+  const tb = g.threeBalls;
+  return `<div class="card" style="margin-bottom:16px">${head}
+    <div class="stats" style="border-top:0">
+      <div><div class="k">Events graded</div><div class="v">${g.eventsGraded}</div></div>
+      ${g.markets.filter(m => m.n).map(m => `<div><div class="k">${esc(m.label)} skill</div><div class="v ${m.skill > 0 ? 'edge-pos' : ''}">${m.skill >= 0 ? '+' : '−'}${Math.abs(m.skill * 100).toFixed(1)}%</div></div>`).join('')}
+      ${tb ? `<div><div class="k" data-tip="Share of R1/R2 3-balls the model favorite won (dead heats split), vs the share the model expected">3-ball favorites</div><div class="v">${pct(tb.favActual, 0)}<small>exp ${pct(tb.favExpected, 0)}</small></div></div>` : ''}
+    </div>
+    <div class="table-wrap" style="border:0;border-top:1px solid var(--line);border-radius:0 0 var(--r) var(--r)"><table class="data">
+      <thead><tr><th class="l">Event</th><th>Field</th><th class="l">Winner</th><th>Model win %</th><th>Winner’s rank</th><th>Top-20 skill</th><th>3-ball favs</th></tr></thead>
+      <tbody>${g.events.map(e => e.status === 'pending' ? `<tr><td class="l"><span class="pname">${esc(e.name)}</span></td><td colspan="6" class="l muted">Projection locked · grades when final</td></tr>` : `<tr><td class="l"><span class="pname">${esc(e.name)}</span><div class="psub">${esc(String(e.date || '').slice(0, 10))}</div></td><td>${e.field}</td><td class="l">${esc(e.winner || '—')}</td><td>${pct(e.winnerProb)}</td><td>${e.winnerRank ? `#${e.winnerRank}` : '—'}</td><td>${e.top20Skill === null ? '—' : `${e.top20Skill >= 0 ? '+' : '−'}${Math.abs(e.top20Skill * 100).toFixed(1)}%`}</td><td>${e.threeBalls?.groups ? `${pct(e.threeBalls.favActual / e.threeBalls.groups, 0)} <span class="muted">/ ${pct(e.threeBalls.favExpected / e.threeBalls.groups, 0)}</span>` : '—'}</td></tr>`).join('')}</tbody>
+    </table></div></div>`;
+}
+async function loadGrades() {
+  if (S.gradesLoading) return;
+  S.gradesLoading = true; S.gradesErr = null; renderBacktest();
+  try { S.grades = await api(`/api/grades?t=${Date.now()}`); } catch (err) { S.gradesErr = err.message; }
+  S.gradesLoading = false; renderBacktest();
 }
 
 async function runBacktestNow() {
@@ -1253,6 +1616,7 @@ function renderAll() {
   renderHero();
   renderOdds();
   renderMatchups();
+  renderDfs();
   renderWeather();
   renderBacktest();
 }
@@ -1263,7 +1627,7 @@ function setTab(tab) {
   const u = new URL(location.href); u.searchParams.set('tab', tab); history.replaceState(null, '', u);
   // Charts measure their container, so draw the weather tab once it is visible.
   if (tab === 'weather') renderWeather();
-  if (tab === 'backtest') renderBacktest();
+  if (tab === 'backtest') { renderBacktest(); if (!S.grades && !S.gradesLoading) loadGrades(); }
 }
 
 document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) setTab(b.dataset.tab); });
@@ -1284,11 +1648,31 @@ document.addEventListener('click', e => {
     const id = seg.parentElement.id, v = seg.dataset.v;
     if (id === 'drawSeg') { S.draw = v; renderOdds(); }
     if (id === 'fmtSeg' || id === 'fmtSeg2') { S.fmt = v; renderOdds(); renderMatchups(); }
-    if (id === 'roundSeg') { S.mRound = Number(v); renderMatchups(); }
+    if (id === 'roundSeg') { S.mRound = Number(v); S.autoRes = null; renderMatchups(); }
     if (id === 'btMarket') { S.btMarket = v; renderBacktest(); }
     if (id === 'btEvents') { S.btEvents = Number(v); renderBacktest(); }
+    if (id === 'dkMode') { S.dkMode = v; S.dkResult = null; renderDfs(); }
+    if (id === 'dkDraw') { S.dkDraw = v; renderDfs(); }
+    if (id === 'autoSize') { S.autoSize = Number(v); S.autoRes = null; renderMatchups(); }
     return;
   }
+  const leg = t.closest('[data-leg]');
+  if (leg) { const [r, id] = leg.dataset.leg.split('|'); toggleLeg(Number(r), id); return; }
+  const un = t.closest('[data-unleg]'); if (un) { S.slip.splice(Number(un.dataset.unleg), 1); S.parlay = null; renderMatchups(); return; }
+  if (t.closest('#priceSlip')) { priceSlip(); return; }
+  if (t.closest('#clearSlip')) { S.slip = []; S.parlay = null; S.parlayErr = null; renderMatchups(); return; }
+  if (t.closest('#autoBuild')) { autoBuild(); return; }
+  const use = t.closest('[data-use]');
+  if (use) { const x = S.autoRes.parlays[Number(use.dataset.use)]; S.slip = x.legs.map(l => ({ round: l.round, id: l.id })); S.parlay = x; renderMatchups(); return; }
+  const lockB = t.closest('[data-lock]');
+  if (lockB) { const id = lockB.dataset.lock; S.dkExcludes.delete(id); S.dkLocks.has(id) ? S.dkLocks.delete(id) : S.dkLocks.add(id); renderDfs(); return; }
+  const exB = t.closest('[data-ex]');
+  if (exB) { const id = exB.dataset.ex; S.dkLocks.delete(id); S.dkExcludes.has(id) ? S.dkExcludes.delete(id) : S.dkExcludes.add(id); renderDfs(); return; }
+  const dkTh = t.closest('th[data-dksort]');
+  if (dkTh) { const k = dkTh.dataset.dksort; S.dkSort = S.dkSort.key === k ? { key: k, dir: -S.dkSort.dir } : { key: k, dir: k === 'name' ? 1 : -1 }; renderDfs(); return; }
+  if (t.closest('#dkBuild')) { buildDfs(); return; }
+  if (t.closest('#dkExport')) { exportDfs(); return; }
+  if (t.closest('#dkResetLx')) { e.preventDefault(); S.dkLocks.clear(); S.dkExcludes.clear(); renderDfs(); return; }
   const dayBtn = t.closest('.day[data-day]'); if (dayBtn) { S.wxDay = Number(dayBtn.dataset.day); renderWeather(); return; }
   if (t.closest('#runBt') || t.closest('#rerunBt')) { runBacktestNow(); }
 });
@@ -1296,12 +1680,20 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeDrawer();
   const row = e.target.closest?.('tr[data-id]');
   if (row && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openDrawer(row.dataset.id); }
+  const legEl = e.target.closest?.('[data-leg]');
+  if (legEl && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); const [r, id] = legEl.dataset.leg.split('|'); toggleLeg(Number(r), id); }
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'q') { S.q = e.target.value; const pos = e.target.selectionStart; renderOdds(); const q = $('#q'); q.focus(); q.setSelectionRange(pos, pos); }
+  if (e.target.id === 'dkq') { S.dkQ = e.target.value; const pos = e.target.selectionStart; renderDfs(); const q = $('#dkq'); q.focus(); q.setSelectionRange(pos, pos); }
   if (e.target.id === 'mq') { S.mq = e.target.value; const pos = e.target.selectionStart; renderMatchups(); const q = $('#mq'); q.focus(); q.setSelectionRange(pos, pos); }
 });
-document.addEventListener('change', e => { if (e.target.id === 'marketSel') { S.market = e.target.value; renderOdds(); } });
+document.addEventListener('change', e => {
+  if (e.target.id === 'marketSel') { S.market = e.target.value; renderOdds(); }
+  if (e.target.id === 'dkCount') { S.dkCount = Number(e.target.value); renderDfs(); }
+  if (e.target.id === 'dkExposure') { S.dkExposure = Number(e.target.value); renderDfs(); }
+  if (e.target.id === 'dkUnique') { S.dkUnique = Number(e.target.value); renderDfs(); }
+});
 $('#scrim').addEventListener('click', closeDrawer);
 let resizeT; addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (S.tab === 'weather') renderWeather(); if (S.tab === 'backtest') renderBacktest(); }, 150); });
 
@@ -1315,6 +1707,7 @@ function navigate() {
   if (S.event) u.searchParams.set('event', S.event); else u.searchParams.delete('event');
   history.replaceState(null, '', u);
   S.data = S.weather = S.backtest = null; S.book = null; S.mRound = null; S.errors = {};
+  S.slip = []; S.parlay = null; S.autoRes = null; S.salaries = null; S.dkResult = null; S.dkLocks = new Set(); S.dkExcludes = new Set();
   renderAll(); load();
 }
 
@@ -1344,12 +1737,16 @@ async function load(force = false) {
       if (saved) { S.book = saved; resolveBook(); }
     } catch { /* storage unavailable */ }
   } else if (S.book) resolveBook();
+  if (S.data && !S.salaries) {
+    try { const saved = JSON.parse(localStorage.getItem(dkKey()) || 'null'); if (saved) S.salaries = saved; } catch { /* storage unavailable */ }
+  }
+  if (S.salaries) resolveSalaries();
   $('#refresh').classList.remove('spin');
   renderAll();
   if (!S.event && S.data) { const sel = $('#eventSelect'); if ([...sel.options].some(o => o.value === S.data.event.id)) sel.value = S.data.event.id; }
 }
 
-setTab(['odds', 'matchups', 'weather', 'backtest'].includes(S.tab) ? S.tab : 'odds');
+setTab(['odds', 'matchups', 'dfs', 'weather', 'backtest'].includes(S.tab) ? S.tab : 'odds');
 renderAll();
 loadEvents();
 load();

@@ -11,10 +11,11 @@ top-N, make-cut, 2-balls and 3-balls can never contradict each other.
 
 | Tab | What it shows |
 |---|---|
-| **Finishing odds** | Win / top 5 / top 10 / top 20 / make cut, fair odds, avg finish, draw (AM/PM) with weather cost, signals, confidence. Click a player for the finish distribution, recent rounds, tee times and reasoning. Upload book odds for an Edge column. |
-| **Matchups** | Every 3-ball / 2-ball from the real tee sheet (R2 projected from R1 until posted), dead-heat-adjusted. Upload a CSV of book prices → de-vigged edges and a "best prices" list ranked by EV. |
+| **Finishing odds** | Win / top 5 / top 10 / top 20 / make cut, fair odds, avg finish, draw (AM/PM) with weather cost, signals, confidence. Once the event starts, a **Pos** column shows leaderboard position, total to par and holes completed (sortable). Click a player for the finish distribution, recent rounds, tee times and reasoning. Upload book odds for an Edge column. |
+| **Matchups** | Every 3-ball / 2-ball from the real tee sheet (R2 projected from R1 until posted), dead-heat-adjusted. Upload a CSV of book prices → de-vigged edges and a "best prices" list ranked by EV. **Parlay builder:** tap players to add legs; legs are priced together inside the simulation (shared wave, same player both rounds), with fair odds and EV vs your book. **Auto-build** finds the best 2/3/4-leg parlays (by EV with book prices, else most likely). |
+| **DraftKings** | DK Classic projections (mean, floor, ceiling) from the same sims. Upload DKSalaries.csv → exact optimizer (6 golfers, $50k): Projection / Balanced / Ceiling, 1–150 lineups, exposure cap, min unique players, draw (wave) stacking, locks/excludes, exposure table, and a CSV in DK's upload format. |
 | **Weather** | Draw verdict with ensemble agreement, day cards, hourly wind/gust chart with ensemble band and wave ribbons, direction strip, wind-by-wave compass, rain and temperature, a wave comparison table, and a full generated briefing. |
-| **Model & backtest** | History data status and a leak-free backtest: Brier / log loss vs no-skill, calibration chart + table, per-event results. |
+| **Model & backtest** | History data status, the **live track record** (each week's locked pre-tournament projection graded when final: market skill, winner rank, 3-ball favorites vs expected) and a leak-free backtest: Brier / log loss vs no-skill, calibration chart + table, per-event results. |
 
 ## How the model works
 
@@ -31,14 +32,24 @@ top-N, make-cut, 2-balls and 3-balls can never contradict each other.
    uncertainty), per-round noise, shared wave shocks, the cut (rule from ESPN → event name → field
    size), integer scores so ties/dead heats/pushes happen naturally, playoffs. Completed rounds use
    real scores; a round in progress uses strokes so far + only the remaining holes.
-5. **Weather** (`lib/weather.js`) — Open-Meteo hourly forecast + GFS 31-member ensemble. Each tee
+5. **DraftKings** (`lib/dk.js`, `lib/dk-optimizer.js`) — each simulated round score becomes expected
+   DK hole points via tour-average par-3/4/5 outcome rates tilted to match the score (exact bogey-free
+   and birdie-streak probabilities over the real hole pars), plus finish points and the under-70 bonus
+   from the same sims. The optimizer is nflprob's exact knapsack (full prefix table), brute-force
+   verified; multiple lineups are each the exact best under exposure/uniqueness rules (branch and
+   bound), with exact dominance pruning. Runs in a Web Worker.
+6. **Parlays** (`lib/parlay.js`) — legs settled per simulated tournament (3-ball dead heats, 2-ball
+   pushes), so the joint probability is counted, not multiplied.
+7. **Grading** (`lib/grading.js`) — the pre-tournament projection is re-saved on every visit until the
+   first tee time; finished events are graded on visit and by the weekly cron.
+8. **Weather** (`lib/weather.js`) — Open-Meteo hourly forecast + GFS 31-member ensemble. Each tee
    time's cost averages ~5 hours of conditions (wind², gusts > 25 mph, heavy rain). Each sim draws
    one ensemble member, so forecast uncertainty flows into the odds. Weekend tee order follows the
    simulated leaderboard. `lib/weather-writeup.js` writes the briefing from the same numbers.
 
 ## Status — what's verified and what isn't
 
-- ✅ **18 tests pass** (`npm test`) on synthetic data with known ground truth: fixed effects recover
+- ✅ **32 tests pass** (`npm test`) on synthetic data with known ground truth: fixed effects recover
   true skill across strong/weak fields, no leakage, probabilities sum correctly (one winner, top-10
   dead-heat shares sum to 10), 3-ball prices match brute force, wave costs move the right players,
   and an end-to-end run of every route with mocked ESPN/Open-Meteo.
@@ -71,6 +82,8 @@ Without a database everything still works — the model just runs on a shorter l
 | `/api/events?tour=pga&season=2026` | Season calendar for the event picker |
 | `/api/backtest?tour=pga&events=8` | Leak-free backtest |
 | `/api/sync?tour=pga&season=2025` | Backfill completed events into Postgres |
+| `POST /api/parlay` | Price a parlay `{legs:[{round,id,dec}]}` or auto-build `{auto:{round,size}}` |
+| `/api/grades` | Grade finished snapshots, return the live track record |
 | `/api/status` | History data status |
 | `/api/health` | Upstream checks + ESPN shape report |
 
@@ -90,9 +103,9 @@ Markets: `3ball`, `2ball`, `win`, `top5`, `top10`, `top20`, `make_cut`. American
 Names match through accents, "Last, First", initials and Jr./III suffixes (an ambiguous name is never
 guessed). Uploaded files stay in the browser (localStorage), per event.
 
-## Next (build order steps 7–9)
+## Next
 
-- Parlay builder on top of the matchup sims (joint probabilities straight from the same draws)
-- DraftKings Classic: DK scoring from hole-by-hole (already stored), salary CSV upload, the
-  nflprob knapsack optimizer (6 golfers, $50k), tee-wave stacking, exposure table
-- Grading of the locked pre-tournament snapshots (`golf_snapshots`) into a live accuracy tracker
+- DK hole-by-hole calibration: the per-hole outcome rates are tour averages; ESPN's core API has
+  hole-by-hole scores to fit them per course once wired in
+- Weather in backtests (store tee times for past events)
+- Recalibrate the high-probability end if the 50–70% top-20 bin stays overconfident in live grades
