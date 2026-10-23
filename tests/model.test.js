@@ -146,4 +146,8 @@ test('cut rules', () => {
   assert.strictEqual(cutRule({ name: 'Some Signature Event', players: new Array(72) }).top, null);
   assert.strictEqual(cutRule({ name: 'Shriners Children’s Open', players: new Array(144) }).top, 65);
   assert.strictEqual(cutRule({ name: 'X', players: new Array(144), cut: { count: 70, round: 2 } }).source, 'espn');
+  // After the cut ESPN reports how many made it (73), not the rule (65 & ties).
+  const players = cutRule({ name: 'THE PLAYERS Championship', state: 'post', players: new Array(123), cut: { count: 73, round: 2 } });
+  assert.deepStrictEqual([players.top, players.source], [65, 'default rule']);
+  assert.strictEqual(cutRule({ name: 'X', state: 'in', currentRound: 3, players: new Array(144), cut: { count: 70, round: 2 } }).source, 'default rule');
 });
