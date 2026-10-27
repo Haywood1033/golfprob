@@ -87,6 +87,13 @@ module.exports = async (req, res) => {
       const d = await fetchJson('https://ensemble-api.open-meteo.com/v1/ensemble?latitude=30.198&longitude=-81.394&hourly=wind_speed_10m&models=gfs025&forecast_days=1');
       return { members: Object.keys(d?.hourly || {}).filter(k => k.startsWith('wind_speed_10m')).length };
     }),
+    // Snapshot storage: fails only when a database is configured but doesn't answer; with none
+    // configured it passes and says projections aren't being saved.
+    check('snapshot-storage', async () => {
+      const st = await require('../lib/store').snapshotStatus();
+      if (st.variable && !st.connected) throw new Error(st.note);
+      return st;
+    }),
   ]);
-  send(res, checks.every(c => c.ok) ? 200 : 502, { tour, checks, database: !!process.env.DATABASE_URL });
+  send(res, checks.every(c => c.ok) ? 200 : 502, { tour, checks, database: require('../lib/db').dbVar });
 };

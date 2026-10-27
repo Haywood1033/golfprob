@@ -66,7 +66,7 @@ top-N, make-cut, 2-balls and 3-balls can never contradict each other.
 ## Deploy
 
 1. Import this repo to Vercel.
-2. (Recommended) Set `DATABASE_URL` to a Supabase Postgres connection string. Tables create
+2. (Recommended) Set `DATABASE_URL` (or `POSTGRES_URL`, which Vercel's Supabase integration sets) to a Postgres connection string. In Supabase: Project Settings → Database → Connection string → URI, transaction pooler (port 6543). Tables create
    themselves on first use.
 3. Deploy, then open `/api/health` to confirm ESPN + Open-Meteo shapes.
 4. Backfill history: call `/api/sync?tour=pga&season=2025` (then `2026`, and `tour=liv`,

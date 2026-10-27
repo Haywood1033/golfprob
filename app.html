@@ -1713,17 +1713,24 @@ function renderBacktest() {
   if (bt && !S.btLoading && $('#calChart')) drawCalibration($('#calChart'), (bt.markets.find(m => m.key === S.btMarket) || bt.markets[0]).bins || []);
 }
 
+// Whether pre-event projections are being saved, and the latest one — so an empty record says why.
+function storageNote(st) {
+  if (!st) return '';
+  if (!st.connected) return `<p class="note" style="margin:0 0 12px;color:var(--neg)"><b>Not saving projections.</b> ${esc(st.note || '')}</p>`;
+  return `<p class="note" style="margin:0 0 12px">Saving to the database (${esc(st.variable)}): ${st.saved} projection${st.saved === 1 ? '' : 's'} saved, ${st.graded} graded${st.last ? `. Last saved: ${esc(st.last.name)}, ${esc(new Date(st.last.savedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}` : ''}.</p>`;
+}
 function gradesHtml() {
   const g = S.grades;
   const head = '<div class="card-h"><h2>Live track record</h2><span class="sub">Each week’s projection locked at the first tee time, graded when the event ends</span></div>';
   if (S.gradesLoading && !g) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b"><div class="skel" style="height:40px"></div></div></div>`;
   if (S.gradesErr) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b note" style="color:var(--neg)">${esc(S.gradesErr)}</div></div>`;
   if (!g) return '';
-  if (!g.available) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b note">${esc(g.note)}</div></div>`;
+  if (!g.available) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b">${storageNote(g.storage) || `<p class="note">${esc(g.note)}</p>`}</div></div>`;
   const pending = g.events.filter(e => e.status === 'pending');
-  if (!g.eventsGraded) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b"><p class="note"><b>Nothing graded yet.</b> The pre-tournament projection is saved on every visit before an event starts, and the last one before the first tee time is graded once the event is final. Events with a saved projection: ${pending.length ? pending.map(e => esc(e.name)).join(', ') : 'none yet — visit the site before next week’s first round'}.</p></div></div>`;
+  if (!g.eventsGraded) return `<div class="card" style="margin-bottom:16px">${head}<div class="card-b">${storageNote(g.storage)}<p class="note"><b>Nothing graded yet.</b> The pre-tournament projection is saved on every visit before an event starts, and the last one before the first tee time is graded once the event is final. Events with a saved projection: ${pending.length ? pending.map(e => esc(e.name)).join(', ') : 'none yet — the daily scheduled run saves the next one before the first round'}.</p></div></div>`;
   const tb = g.threeBalls;
   return `<div class="card" style="margin-bottom:16px">${head}
+    ${g.storage ? `<div class="card-b" style="padding-bottom:0">${storageNote(g.storage)}</div>` : ''}
     <div class="stats" style="border-top:0">
       <div><div class="k">Events graded</div><div class="v">${g.eventsGraded}</div></div>
       ${g.markets.filter(m => m.n).map(m => `<div><div class="k">${esc(m.label)} skill</div><div class="v ${m.skill > 0 ? 'edge-pos' : ''}">${m.skill >= 0 ? '+' : '−'}${Math.abs(m.skill * 100).toFixed(1)}%</div></div>`).join('')}
